@@ -66,13 +66,13 @@ def get_article_info(headline, keywords):
     while i > 0:
         time_out = randint(2, 5)
         time.sleep(time_out)
-        response_code = requests.get(article_link).status_code
+        response_code = requests.get(article_link, timeout = 5.0).status_code
 
         if response_code == 200:     
 
             info = dict()
 
-            html = requests.get(article_link).content
+            html = requests.get(article_link, timeout = 5.0).content
             sel = Selector(text = html)
 
             title_sel = "title ::text"
@@ -121,7 +121,7 @@ def front_page_check(url, keywords, url_list):
     '''
     #selector of main page
     url = url
-    html = requests.get(url).content
+    html = requests.get(url, timeout = 5.0).content
     sel = Selector(text = html)
 
     #selector of top frontpage contet
@@ -186,7 +186,7 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
     
     while i > 0:
         try:
-            response = requests.get(main_url)
+            response = requests.get(main_url, timeout = 5.0)
             break
         except:
             i = i - 1
