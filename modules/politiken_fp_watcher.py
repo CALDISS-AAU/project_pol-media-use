@@ -124,7 +124,7 @@ def front_page_check(url, keywords, url_list):
         if not link in url_list:
             art_info = get_article_info(link)
             articles.append(art_info)
-			url_list.append(link)
+            url_list.append(link)
     
     return(articles)
 
