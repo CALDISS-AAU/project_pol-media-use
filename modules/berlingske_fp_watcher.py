@@ -14,6 +14,9 @@ import uuid
 from random import randint
 from itertools import compress
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def keyword_check(keywords, headline):
     '''
@@ -142,7 +145,7 @@ def front_page_check(url, keywords, url_list):
     for headline in headlines_ext:
         link = get_articlelink(headline)
         if not link in url_list:
-            art_info = get_article_info(headline, keywords)
+            art_info = get_article_info(headline, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
     
@@ -170,12 +173,14 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
             f.close()
     except IOError:
         print("No existing url list. Creating new file {}".format(urllist_filename))
+		logger.info("No existing url list. Creating new file {}".format(urllist_filename))
 
     try:
         with open(datadir + data_filename, 'r') as f:
             f.close()
     except IOError:
         print("No existing data file. Creating new file {}".format(data_filename))
+		logger.info("No existing data file. Creating new file {}".format(data_filename))
         with open(datadir + data_filename, 'w') as f:
             json.dump([], f)
 
@@ -215,7 +220,9 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
                 f.close()
             
             print("Berlingske front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+			logger.info("Berlingske front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
             return
     else:
         print("Error retrieving Berlingske front page on {time}. Skipping...".format(time = datetime.datetime.now()))
+		logger.warning("Error retrieving Berlingske front page on {time}. Skipping...".format(time = datetime.datetime.now()))
         return       
