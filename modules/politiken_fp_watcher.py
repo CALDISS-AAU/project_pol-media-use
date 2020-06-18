@@ -153,14 +153,14 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
             f.close()
     except IOError:
         print("No existing url list. Creating new file {}".format(urllist_filename))
-		logger.info("No existing url list. Creating new file {}".format(urllist_filename))
+        logger.info("No existing url list. Creating new file {}".format(urllist_filename))
 
     try:
         with open(datadir + data_filename, 'r') as f:
             f.close()
     except IOError:
         print("No existing data file. Creating new file {}".format(data_filename))
-		logger.info("No existing data file. Creating new file {}".format(data_filename))
+        logger.info("No existing data file. Creating new file {}".format(data_filename))
         with open(datadir + data_filename, 'w') as f:
             json.dump([], f)
 
@@ -200,9 +200,9 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
                 f.close()
             
             print("Politiken front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
-			logger.info("Politiken front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+            logger.info("Politiken front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
             return
     else:
         print("Error retrieving Politiken front page on {time}. Skipping...".format(time = datetime.datetime.now()))
-		logger.warning("Error retrieving Politiken front page on {time}. Skipping...".format(time = datetime.datetime.now()))
+        logger.warning("Error retrieving Politiken front page on {time}. Skipping...".format(time = datetime.datetime.now()))
         return       
