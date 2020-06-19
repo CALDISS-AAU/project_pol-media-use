@@ -30,7 +30,7 @@ def keyword_check(keywords, headline):
     else:
         return False
     
-def get_article_info(headline, keywords):
+def get_article_info(link, keywords):
     '''
     Creates a dictionary of information from a headline.
     '''    
@@ -125,7 +125,7 @@ def front_page_check(url, keywords, url_list):
 
     for link in links_ext:
         if not link in url_list:
-            art_info = get_article_info(link, keywords = keywords)
+            art_info = get_article_info(link = link, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
     
