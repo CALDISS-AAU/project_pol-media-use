@@ -57,7 +57,7 @@ def update_tweets_data(twitter_profiles, tweet_columns, datadir):
     if not os.path.isdir(datadir):
         os.mkdir(datadir)
     
-    run_date_default = "2020-01-01"
+    run_date_default = "2020-01-01 08:00:00"
     
     try:
         with open(datadir + 'last_run_date.txt', 'r') as f:

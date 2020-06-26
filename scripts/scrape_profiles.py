@@ -21,7 +21,7 @@ def main():
 
     datadir = "../data/tweets/"
 
-    end_time = datetime(2020, 8, 1)
+    end_time = datetime.datetime(2020, 8, 1)
 
     dt_now = datetime.datetime.now()
 
