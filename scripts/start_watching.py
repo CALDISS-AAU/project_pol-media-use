@@ -35,5 +35,5 @@ def main():
 
 if __name__ == '__main__':
     FORMAT = '%(asctime)-15s %(message)s'
-    logging.basicConfig(filename='./watcher.log', filemode='w', level=logging.INFO, format = FORMAT)
+    logging.basicConfig(filename='./scraper.log', filemode='w', level=logging.INFO, format = FORMAT)
     main()
