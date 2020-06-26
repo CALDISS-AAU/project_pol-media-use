@@ -1,3 +1,4 @@
+import sys
 sys.path.append('../modules')
 import twitter_scrape_profiles as tsp
 import sys
