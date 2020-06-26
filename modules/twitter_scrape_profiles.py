@@ -100,6 +100,6 @@ def update_tweets_data(twitter_profiles, tweet_columns, datadir):
         
         with open(datadir + 'last_run_date.txt', 'w') as f:
             f.write(date_today)
-	else:
-	    logger.info("No new data since last run.")
+    else:
+        logger.info("No new data since last run.")
     logger.info("Update complete!")
