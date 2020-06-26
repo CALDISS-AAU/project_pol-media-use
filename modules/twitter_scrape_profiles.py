@@ -26,7 +26,7 @@ def scrape_user(profile, date, datadir, columns):
     twint.run.Search(c)
 
 def newline_fix(tweet):
-    new_tweet = tweet.replace('\n', ' ')
+    new_tweet = tweet.replace('    n', ' ')
     return(new_tweet)
 
 def import_tweets(profile, datadir):
