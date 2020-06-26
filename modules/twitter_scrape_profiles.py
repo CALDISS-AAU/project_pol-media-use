@@ -74,31 +74,32 @@ def update_tweets_data(twitter_profiles, tweet_columns, datadir):
         for profile in twitter_profiles:
             scrape_user(profile, run_date, datadir, tweet_columns)
     
-    logger.info("Combining data...")
-    tweets_all_df = combine_tweets(twitter_profiles, tweet_columns, datadir)
+        logger.info("Combining data...")
+        tweets_all_df = combine_tweets(twitter_profiles, tweet_columns, datadir)
     
-    logger.info("Exporting data...")
-    filename = "pol_tweets.csv"
+        logger.info("Exporting data...")
+        filename = "pol_tweets.csv"
     
-    try:
-        tweets_cache = pd.read_csv(datadir + filename)
-        tweets_all_df = tweets_cache.append(tweets_all_df, ignore_index = True)
-        tweets_all_df.drop_duplicates(inplace = True)
-        tweets_all_df.to_csv(datadir + filename, index = False)
-    except IOError:
-        logger.warning("No cache file for tweets found. Creating new data file...")
-        tweets_all_df.drop_duplicates(inplace = True)
-        tweets_all_df.to_csv(datadir + filename, index = False)
-    
-    logger.info("Removing temporary data files...")
-    for profile in twitter_profiles:
         try:
-            os.remove(datadir + profile + ".csv")
+            tweets_cache = pd.read_csv(datadir + filename)
+            tweets_all_df = tweets_cache.append(tweets_all_df, ignore_index = True)
+            tweets_all_df.drop_duplicates(inplace = True)
+            tweets_all_df.to_csv(datadir + filename, index = False)
         except IOError:
-            continue
+            logger.warning("No cache file for tweets found. Creating new data file...")
+            tweets_all_df.drop_duplicates(inplace = True)
+            tweets_all_df.to_csv(datadir + filename, index = False)
         
-    
-    with open(datadir + 'last_run_date.txt', 'w') as f:
-        f.write(date_today)
+        logger.info("Removing temporary data files...")
+        for profile in twitter_profiles:
+            try:
+                os.remove(datadir + profile + ".csv")
+            except IOError:
+                continue
+            
         
+        with open(datadir + 'last_run_date.txt', 'w') as f:
+            f.write(date_today)
+	else:
+	    logger.info("No new data since last run.")
     logger.info("Update complete!")
