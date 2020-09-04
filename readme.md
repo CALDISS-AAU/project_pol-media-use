@@ -51,7 +51,7 @@ Det er aftalt, at værktøjet skal kunne holde øje med følgende nyhedshjemmesi
 
 
 
-Derudover afsøges i løbet af projektet mulighederne for at skaffe og bearbejde Facebook data.
+Derudover afsøges i løbet af projektet mulighederne for at skaffe og bearbejde Facebook data. 
 
 ### Betingelser
 
@@ -89,6 +89,7 @@ Det aftales, at CALDISS i dette bridging projekt leverer følgende:
 - Et værktøj til at indhente data om danske politikeres opslag på twitter
 - Et værktøj til at overvåge forsiderne af DR, TV2, Berlingske og Politiken for bestemte nøgleord, og potentielt lagre de artikler, der matcher nøgleord
 - En afklaring af hvad der er muligt med Facebook data
+- Værktøj til til indsamling af Facebook-data under forudsætning af, at det 1) er praktisk muligt og 2) er lovligt. 
 - En workshop inden for brug af værktøjerne
 - En workshop der giver indføring i den programmering brugt til at udvikle værktøjerne
 
