@@ -62,6 +62,7 @@ def update_tweets_data(twitter_profiles, tweet_columns, datadir):
     try:
         with open(datadir + 'last_run_date.txt', 'r') as f:
             run_date = f.readline()
+            run_date = run_date + ' 00:00:00'
             f.close()
     except IOError:
         logger.warning("No existing log for last run time. Using default ({run_date})".format(run_date = run_date_default))

@@ -14,7 +14,7 @@ def main():
 
     datadir = "../data/"
 
-    end_time = datetime(2020, 7, 1)
+    end_time = datetime(2020, 8, 17)
 
     dt_now = datetime.now()
 
