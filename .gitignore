@@ -6,3 +6,4 @@ data/tweets/*.txt
 */nohup.out
 nohup.out
 data/data/
+data/testing

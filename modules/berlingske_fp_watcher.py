@@ -174,6 +174,8 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
     except IOError:
         print("No existing url list. Creating new file {}".format(urllist_filename))
         logger.info("No existing url list. Creating new file {}".format(urllist_filename))
+        if not os.path.isdir(urldir):
+            os.mkdir(urldir)
 
     try:
         with open(datadir + data_filename, 'r') as f:
