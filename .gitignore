@@ -5,3 +5,4 @@ data/tweets/*.csv
 data/tweets/*.txt
 */nohup.out
 nohup.out
+data/data/
