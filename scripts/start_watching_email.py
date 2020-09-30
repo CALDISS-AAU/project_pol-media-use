@@ -6,6 +6,7 @@ sys.path.append('../modules')
 import berlingske_fp_watcher as berwatch
 import politiken_fp_watcher as polwatch
 import dr_fp_watcher as drwatch
+import tv2_fp_watcher as tv2watch
 import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -71,6 +72,17 @@ def main():
 
             s.send_message(msg)   
         
+        print("{time}: Checking TV2 front page...".format(time = dt_now))
+        logger.info("Checking TV2 front page...")
+        try:
+            tv2watch.headline_watch(keywords = keywords, datadir = datadir)
+        except Exception as e:
+            logger.error("Failed to run watch on TV2: " + str(e))
+            message = "<p><i>Watch on TV2 was halted with the following error:</i> <br /> <br /> {error}".format(error = e)
+            msg.attach(MIMEText(message, 'html'))
+
+            s.send_message(msg) 
+            
         s.quit()
         
         time_out = randint(41*60, 62*60)

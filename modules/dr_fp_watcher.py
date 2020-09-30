@@ -26,7 +26,7 @@ def keyword_check(keywords, headline):
     else:
         return False
 
-def get_article_info(link):
+def get_article_info(link, keywords):
     '''
     Creates a dictionary of information from a headline.
     '''
@@ -38,13 +38,13 @@ def get_article_info(link):
     while i > 0:
         time_out = randint(2, 5)
         time.sleep(time_out)
-        response_code = requests.get(link).status_code
+        response_code = requests.get(link, timeout = 5.0).status_code
 
         if response_code == 200:     
 
             info = dict()
 
-            html = requests.get(link).content
+            html = requests.get(link, timeout = 5.0).content
             soup = bs(html, "html.parser")
 
             article_title = soup.title.get_text()
@@ -93,7 +93,7 @@ def front_page_check(url, keywords, url_list):
     '''    
     #selector of main page
     url = url
-    html = requests.get(url).content
+    html = requests.get(url, timeout = 5.0).content
     soup = bs(html, "html.parser")
 
     #get headline soups
@@ -120,8 +120,9 @@ def front_page_check(url, keywords, url_list):
     for link in links_ext:
         if not link in url_list:
             print("accessing..." + link)
-            art_info = get_article_info(link)
+            art_info = get_article_info(link = link, keywords = keywords)
             articles.append(art_info)
+            url_list.append(link)
             
     return(articles)
 
@@ -159,7 +160,7 @@ def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indl
         with open(datadir + data_filename, 'w') as f:
             json.dump([], f)
 
-    i = 2
+    i = 3
 
     while i > 0:
         try:

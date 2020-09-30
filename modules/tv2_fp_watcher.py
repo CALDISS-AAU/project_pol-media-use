@@ -1,11 +1,8 @@
 from bs4 import BeautifulSoup as bs
 
-import scrapy
 import requests
-from scrapy import Selector
 
 import os
-import sys
 import datetime
 
 import re
@@ -23,18 +20,16 @@ def keyword_check(keywords, headline):
     '''
     Checks whether headline contains keywords.
     '''
-    text = headline.css(" ::text").getall()
-    text = ' '.join(text)
-    text = text.lower()
+    text = headline['title']
     if any(word in text for word in keywords):
         return True
     else:
         return False
-    
+
 def get_article_info(link, keywords):
     '''
     Creates a dictionary of information from a headline.
-    '''    
+    '''
     i = 3
     
     art_uuid = str(uuid.uuid4())
@@ -50,21 +45,21 @@ def get_article_info(link, keywords):
             info = dict()
 
             html = requests.get(link, timeout = 5.0).content
-            sel = Selector(text = html)
+            soup = bs(html, "html.parser")
 
-            title_sel = "title ::text"
-            datetime_xpath = '//meta[contains(@property,"article:published_time")]/@content'
-
-            article_title = sel.css(title_sel).get()
-            article_datetime = sel.xpath(datetime_xpath).get()
+            article_title = soup.title.get_text()
+            try:
+                article_datetime = soup.find("meta", attrs={"name": "article:published_time"})['content']
+            except TypeError:
+                article_datetime = ''
 
             matches = list(compress(keywords, [keyword in article_title.lower() for keyword in keywords]))
 
             info['uuid'] = art_uuid
             info['article_accessed'] = 1
-            info['newspaper_name'] = 'Politiken'
-            info['newspaper_frontpage_url'] = 'https://politiken.dk/'
-            info['frontpage_selector'] = "section.frontpage__section"
+            info['newspaper_name'] = 'TV2 Nyheder'
+            info['newspaper_frontpage_url'] = 'https://nyheder.tv2.dk/seneste'
+            info['frontpage_selector'] = "div.o-article_wrap.g-con.g-col.g-row_l.g-gutter.g-colx.u-space_t-single"
             info['keywords_search'] = keywords
             info['keywords_match'] = matches
             info['article_title'] = article_title
@@ -81,9 +76,9 @@ def get_article_info(link, keywords):
             
             info['uuid'] = art_uuid
             info['article_accessed'] = 0
-            info['newspaper_name'] = 'Politiken'
-            info['newspaper_frontpage_url'] = 'https://politiken.dk/'
-            info['frontpage_selector'] = "section.frontpage__section"
+            info['newspaper_name'] = 'TV2 Nyheder'
+            info['newspaper_frontpage_url'] = 'https://nyheder.tv2.dk/seneste'
+            info['frontpage_selector'] = "div.o-article_wrap.g-con.g-col.g-row_l.g-gutter.g-colx.u-space_t-single"
             info['keywords_search'] = keywords
             info['keywords_match'] = ''
             info['article_title'] = ''
@@ -95,18 +90,14 @@ def get_article_info(link, keywords):
 def front_page_check(url, keywords, url_list):
     '''
     Creates dictionary of headlines with various information.
-    '''
+    '''    
     #selector of main page
     url = url
     html = requests.get(url, timeout = 5.0).content
-    sel = Selector(text = html)
+    soup = bs(html, "html.parser")
 
-    #selector of top frontpage contet
-    front_sel = "section.frontpage__section"
-    front_page = sel.css(front_sel)
-
-    #get headline selectors
-    headlines = front_page.css("h2")
+    #get headline soups
+    headlines = soup.find_all("a", class_="o-teaser_link")
 
     #extract headlines based on keyword
     headlines_ext = list()
@@ -114,39 +105,41 @@ def front_page_check(url, keywords, url_list):
     for headline in headlines:
         if keyword_check(keywords, headline) == True:
             headlines_ext.append(headline)
-        
+
     #get links from extracted headlines
     links_ext = list()
     for headline in headlines_ext:
-        links_ext.append(headline.css("a::attr(href)").get())
+        link = "https:" + headline['href']
+        links_ext.append(link)
     links_ext = list(filter(None, links_ext))
-    
+    links_ext = list(set(links_ext))
+
     #get article info
     articles = []
 
     for link in links_ext:
         if not link in url_list:
+            print("accessing..." + link)
             art_info = get_article_info(link = link, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
-    
+            
     return(articles)
 
-
-def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
+def headline_watch(keywords, datadir, main_url = 'https://nyheder.tv2.dk/seneste'):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
     keywords = keywords
-    
+
     urldir = datadir + "urls/"
-    
-    urllist_filename = "politiken_article_urls.txt"
-    
-    data_filename = "politiken_articles.json"
-    
+
+    urllist_filename = "tv2_article_urls.txt"
+
+    data_filename = "tv2_articles.json"
+
     url_list = []
-    
+
     try:
         with open(urldir + urllist_filename, 'r') as f:
             for line in f:
@@ -168,7 +161,7 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
             json.dump([], f)
 
     i = 3
-    
+
     while i > 0:
         try:
             response = requests.get(main_url, timeout = 5.0)
@@ -178,7 +171,7 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
             time_int = random.uniform(0.1, 0.2) 
             time.sleep(time_int)
             continue
-    
+
     if i > 0: 
         if response.status_code == 200:
             articles = front_page_check(url = main_url, keywords = keywords, url_list = url_list)
@@ -194,18 +187,18 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
 
             for article in articles:
                 url_list.append(article['article_link'])
-            
+
             url_list = list(set(url_list))
 
             with open(urldir + urllist_filename, 'w') as f:
                 for url in url_list:
                     f.write(url + "\n")
                 f.close()
-            
-            print("Politiken front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
-            logger.info("Politiken front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+
+            print("TV2 front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+            logger.info("TV2 front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
             return
     else:
-        print("Error retrieving Politiken front page on {time}. Skipping...".format(time = datetime.datetime.now()))
-        logger.warning("Error retrieving Politiken front page on {time}. Skipping...".format(time = datetime.datetime.now()))
-        return       
+        print("Error retrieving TV2 front page on {time}. Skipping...".format(time = datetime.datetime.now()))
+        logger.warning("Error retrieving TV2 front page on {time}. Skipping...".format(time = datetime.datetime.now()))      
+        return
