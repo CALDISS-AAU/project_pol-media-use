@@ -29,7 +29,7 @@ def main():
 
     datadir = "../data/"
 
-    end_time = datetime(2020, 8, 17)
+    end_time = datetime(2020, 10, 2)
 
     dt_now = datetime.now()
     

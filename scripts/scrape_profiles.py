@@ -29,7 +29,7 @@ def main():
         tsp.update_tweets_data(twitter_profiles, tweet_columns, datadir)
         time_out = 24 * 60 * 60
         time.sleep(time_out)
-		dt_now = datetime.datetime.now()
+        dt_now = datetime.datetime.now()
 
 if __name__ == '__main__':
     FORMAT = '%(asctime)-15s %(message)s'
