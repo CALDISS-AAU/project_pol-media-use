@@ -7,3 +7,4 @@ data/tweets/*.txt
 nohup.out
 data/data/
 data/testing
+*/__pycache__/*

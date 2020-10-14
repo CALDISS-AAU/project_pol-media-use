@@ -26,7 +26,7 @@ def keyword_check(keywords, headline):
     text = headline.css("div ::text").getall()
     text = ' '.join(text)
     text = text.lower()
-    if any(word in text for word in keywords):
+    if any(re.match(word, text) for word in keywords):
         return True
     else:
         return False
