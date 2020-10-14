@@ -3,6 +3,10 @@
 personal/
 data/tweets/*.csv
 data/tweets/*.txt
+data/*.txt
+data/*.csv
+data/*/*.csv
+data/*/*.txt
 */nohup.out
 nohup.out
 data/data/
