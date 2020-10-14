@@ -16,17 +16,20 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+html_classes = {"DR Nyheder": "dre-teaser-title*", 
+                "Politiken": }
+
 def keyword_check(keywords, headline):
     '''
     Checks whether headline contains keywords.
     '''
-    text = headline['title']
+    text = headline.get_text().lower()
     if any(re.match(word, text) for word in keywords):
         return True
     else:
         return False
-
-def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politik/"):
+    
+def get_article_info(link, keywords, source, source_url):
     '''
     Creates a dictionary of information from a headline.
     '''
@@ -50,7 +53,7 @@ def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politi
 
             article_title = soup.title.get_text()
             try:
-                article_datetime = soup.find("meta", attrs={"name": "article:published_time"})['content']
+                article_datetime = soup.time['datetime']
             except TypeError:
                 article_datetime = ''
 
@@ -58,7 +61,7 @@ def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politi
 
             info['uuid'] = art_uuid
             info['article_accessed'] = 1
-            info['newspaper_name'] = 'TV2 Nyheder'
+            info['newspaper_name'] = source
             info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = matches
@@ -66,8 +69,7 @@ def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politi
             info['article_link'] = link
             info['article_datetime'] = article_datetime
             info['encounter_datetime'] = encounter_time
-            info['article_source'] = str(bs(req.content, "html.parser"))
-            
+            info['article_source'] = req.content
             return(info)
         else:
             i = i -1
@@ -78,7 +80,7 @@ def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politi
             
             info['uuid'] = art_uuid
             info['article_accessed'] = 0
-            info['newspaper_name'] = 'TV2 Nyheder'
+            info['newspaper_name'] = source
             info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = ''
@@ -87,20 +89,22 @@ def get_article_info(link, keywords, source_url = "https://nyheder.tv2.dk/politi
             info['article_datetime'] = ''
             info['encounter_datetime'] = encounter_time
             info['article_source'] = ''
-            
             return(info)
 
-def front_page_check(url, keywords, url_list):
+def front_page_check(source, source_url, keywords, url_list):
     '''
     Creates dictionary of headlines with various information.
     '''    
-    #soup of main page
-    url = url
+    #selector of main page
+    url = source_url
     html = requests.get(url, timeout = 5.0).content
     soup = bs(html, "html.parser")
 
     #get headline soups
-    headlines = soup.find_all("a", class_="o-teaser_link")
+    if source == "DR Nyheder":
+        headlines = soup.find_all("a", class_=re.compile("dre-teaser-title*"))
+    elif source == "Politiken":
+        headlines = soup.find_all("h2", class_=re.compile("article-intro__title")
 
     #extract headlines based on keyword
     headlines_ext = list()
@@ -112,10 +116,7 @@ def front_page_check(url, keywords, url_list):
     #get links from extracted headlines
     links_ext = list()
     for headline in headlines_ext:
-        if "https:" not in headline['href']:
-            link = "https:" + headline['href']
-        else:
-            link = headline['href']
+        link = "https://www.dr.dk" + headline['href']
         links_ext.append(link)
     links_ext = list(filter(None, links_ext))
     links_ext = list(set(links_ext))
@@ -128,12 +129,10 @@ def front_page_check(url, keywords, url_list):
             art_info = get_article_info(link = link, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
-            time_out = random.uniform(0.5, 2.0)
-            time.sleep(time_out)
             
     return(articles)
 
-def headline_watch(keywords, datadir, source_url = "https://nyheder.tv2.dk/politik/"):
+def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indland'):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
@@ -141,9 +140,9 @@ def headline_watch(keywords, datadir, source_url = "https://nyheder.tv2.dk/polit
 
     urldir = datadir + "urls/"
 
-    urllist_filename = "tv2_article_urls.txt"
+    urllist_filename = "dr_article_urls.txt"
 
-    data_filename = "tv2_articles.json"
+    data_filename = "dr_articles.json"
 
     url_list = []
 
@@ -171,7 +170,7 @@ def headline_watch(keywords, datadir, source_url = "https://nyheder.tv2.dk/polit
 
     while i > 0:
         try:
-            response = requests.get(source_url, timeout = 5.0)
+            response = requests.get(main_url, timeout = 5.0)
             break
         except:
             i = i - 1
@@ -181,7 +180,7 @@ def headline_watch(keywords, datadir, source_url = "https://nyheder.tv2.dk/polit
 
     if i > 0: 
         if response.status_code == 200:
-            articles = front_page_check(url = source_url, keywords = keywords, url_list = url_list)
+            articles = front_page_check(url = main_url, keywords = keywords, url_list = url_list)
 
             if len(articles) != 0:
                 with open(datadir + data_filename, 'r') as f:
@@ -202,10 +201,10 @@ def headline_watch(keywords, datadir, source_url = "https://nyheder.tv2.dk/polit
                     f.write(url + "\n")
                 f.close()
 
-            print("TV2 front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
-            logger.info("TV2 front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+            print("DR front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+            logger.info("DR front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
             return
     else:
-        print("Error retrieving TV2 front page on {time}. Skipping...".format(time = datetime.datetime.now()))
-        logger.warning("Error retrieving TV2 front page on {time}. Skipping...".format(time = datetime.datetime.now()))      
+        print("Error retrieving DR front page on {time}. Skipping...".format(time = datetime.datetime.now()))
+        logger.warning("Error retrieving DR front page on {time}. Skipping...".format(time = datetime.datetime.now()))      
         return

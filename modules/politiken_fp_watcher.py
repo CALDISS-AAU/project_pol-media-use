@@ -23,15 +23,13 @@ def keyword_check(keywords, headline):
     '''
     Checks whether headline contains keywords.
     '''
-    text = headline.css(" ::text").getall()
-    text = ' '.join(text)
-    text = text.lower()
-    if any(word in text for word in keywords):
+    text = headline.get_text().lower()
+    if any(re.match(word, text) for word in keywords):
         return True
     else:
         return False
     
-def get_article_info(link, keywords):
+def get_article_info(link, keywords, source_url = "https://politiken.dk/indland/politik/"):
     '''
     Creates a dictionary of information from a headline.
     '''    
@@ -43,7 +41,8 @@ def get_article_info(link, keywords):
     while i > 0:
         time_out = randint(2, 5)
         time.sleep(time_out)
-        response_code = requests.get(link, timeout = 5.0).status_code
+        req = requests.get(link, timeout = 5.0)
+        response_code = req.status_code
 
         if response_code == 200:     
 
@@ -63,14 +62,15 @@ def get_article_info(link, keywords):
             info['uuid'] = art_uuid
             info['article_accessed'] = 1
             info['newspaper_name'] = 'Politiken'
-            info['newspaper_frontpage_url'] = 'https://politiken.dk/'
-            info['frontpage_selector'] = "section.frontpage__section"
+            info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = matches
             info['article_title'] = article_title
             info['article_link'] = link
             info['article_datetime'] = article_datetime
             info['encounter_datetime'] = encounter_time
+            info['article_source'] = str(bs(req.content, "html.parser"))
+            
             return(info)
         else:
             i = i -1
@@ -82,14 +82,15 @@ def get_article_info(link, keywords):
             info['uuid'] = art_uuid
             info['article_accessed'] = 0
             info['newspaper_name'] = 'Politiken'
-            info['newspaper_frontpage_url'] = 'https://politiken.dk/'
-            info['frontpage_selector'] = "section.frontpage__section"
+            info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = ''
             info['article_title'] = ''
             info['article_link'] = link
             info['article_datetime'] = ''
             info['encounter_datetime'] = encounter_time
+            info['article_source'] = ''
+            
             return(info)
 
 def front_page_check(url, keywords, url_list):
@@ -99,15 +100,11 @@ def front_page_check(url, keywords, url_list):
     #selector of main page
     url = url
     html = requests.get(url, timeout = 5.0).content
-    sel = Selector(text = html)
+    soup = bs(html, "html.parser")
 
-    #selector of top frontpage contet
-    front_sel = "section.frontpage__section"
-    front_page = sel.css(front_sel)
-
-    #get headline selectors
-    headlines = front_page.css("h2")
-
+    #get headline soups
+    headlines = soup.find_all("h2", class_=re.compile("article-intro__title headline*"))
+    
     #extract headlines based on keyword
     headlines_ext = list()
 
@@ -118,7 +115,7 @@ def front_page_check(url, keywords, url_list):
     #get links from extracted headlines
     links_ext = list()
     for headline in headlines_ext:
-        links_ext.append(headline.css("a::attr(href)").get())
+        links_ext.append(headline.a['href'])
     links_ext = list(filter(None, links_ext))
     
     #get article info
@@ -129,11 +126,13 @@ def front_page_check(url, keywords, url_list):
             art_info = get_article_info(link = link, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
+            time_out = random.uniform(0.5, 2.0)
+            time.sleep(time_out)
     
     return(articles)
 
 
-def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
+def headline_watch(keywords, datadir, source_url = "https://politiken.dk/indland/politik/"):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
@@ -171,7 +170,7 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
     
     while i > 0:
         try:
-            response = requests.get(main_url, timeout = 5.0)
+            response = requests.get(source_url, timeout = 5.0)
             break
         except:
             i = i - 1
@@ -181,7 +180,7 @@ def headline_watch(keywords, datadir, main_url = 'https://politiken.dk/'):
     
     if i > 0: 
         if response.status_code == 200:
-            articles = front_page_check(url = main_url, keywords = keywords, url_list = url_list)
+            articles = front_page_check(url = source_url, keywords = keywords, url_list = url_list)
 
             if len(articles) != 0:
                 with open(datadir + data_filename, 'r') as f:

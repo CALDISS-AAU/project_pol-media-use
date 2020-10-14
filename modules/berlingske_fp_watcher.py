@@ -23,34 +23,13 @@ def keyword_check(keywords, headline):
     '''
     Checks whether headline contains keywords.
     '''
-    text = headline.css("div ::text").getall()
-    text = ' '.join(text)
-    text = text.lower()
+    text = headline.get_text().lower()
     if any(re.match(word, text) for word in keywords):
         return True
     else:
         return False
-    
-def get_headline(headline_sel):
-    '''
-    Extracts the headline from a Selector object as text.
-    '''
-    headline = Selector(text = headline_sel.css("div:first-of-type").get()).css(' ::text').getall()
-    headline = ''.join(headline)
-    headline = headline.lower()
-    headline = re.sub('\n', ' ', headline)
-    headline = re.sub('\s\s', '', headline)
-    headline = re.sub('\s\s', '', headline)
-    return(headline)
 
-def get_articlelink(headline_sel):
-    '''
-    Extracts the link to the article from the headline.
-    '''
-    link = headline_sel.css("::attr(href)").get()
-    return(link)
-
-def get_article_info(headline, keywords):
+def get_article_info(link, keywords, source_url = "https://www.berlingske.dk/nyheder/politik"):
     '''
     Creates a dictionary of information from a headline.
     '''    
@@ -59,21 +38,17 @@ def get_article_info(headline, keywords):
     art_uuid = str(uuid.uuid4())
     encounter_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
     
-    frontpage_title = get_headline(headline)
-    article_link = headline.css("::attr(href)").get()
-    
-    matches = list(compress(keywords, [keyword in frontpage_title for keyword in keywords]))
-    
     while i > 0:
         time_out = randint(2, 5)
         time.sleep(time_out)
-        response_code = requests.get(article_link, timeout = 5.0).status_code
+        req = requests.get(link, timeout = 5.0)
+        response_code = req.status_code
 
         if response_code == 200:     
 
             info = dict()
 
-            html = requests.get(article_link, timeout = 5.0).content
+            html = requests.get(link, timeout = 5.0).content
             sel = Selector(text = html)
 
             title_sel = "title ::text"
@@ -81,19 +56,21 @@ def get_article_info(headline, keywords):
 
             article_title = sel.css(title_sel).get()
             article_datetime = sel.xpath(datetime_xpath).get()
-
+            
+            matches = list(compress(keywords, [keyword in article_title.lower() for keyword in keywords]))
+            
             info['uuid'] = art_uuid
             info['article_accessed'] = 1
             info['newspaper_name'] = 'Berlingske'
-            info['newspaper_frontpage_url'] = 'https://www.berlingske.dk/'
-            info['frontpage_selector'] = "div.front.theme-berlingske"
+            info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = matches
             info['article_title'] = article_title
-            info['frontpage_title'] = frontpage_title
-            info['article_link'] = article_link
+            info['article_link'] = link
             info['article_datetime'] = article_datetime
             info['encounter_datetime'] = encounter_time
+            info['article_source'] = str(bs(req.content, "html.parser"))
+            
             return(info)
         else:
             i = i -1
@@ -105,15 +82,15 @@ def get_article_info(headline, keywords):
             info['uuid'] = art_uuid
             info['article_accessed'] = 0
             info['newspaper_name'] = 'Berlingske'
-            info['newspaper_frontpage_url'] = 'https://www.berlingske.dk/'
-            info['frontpage_selector'] = "div.front.theme-berlingske"
+            info['newspaper_frontpage_url'] = source_url
             info['keywords_search'] = keywords
             info['keywords_match'] = matches
             info['article_title'] = ''
-            info['frontpage_title'] = frontpage_title
-            info['article_link'] = article_link
+            info['article_link'] = link
             info['article_datetime'] = ''
             info['encounter_datetime'] = encounter_time
+            info['article_source'] = ''
+            
             return(info)
 
 def front_page_check(url, keywords, url_list):
@@ -123,15 +100,10 @@ def front_page_check(url, keywords, url_list):
     #selector of main page
     url = url
     html = requests.get(url, timeout = 5.0).content
-    sel = Selector(text = html)
-
-    #selector of top frontpage contet
-    front_sel = "div.front.theme-berlingske"
-    front_page = sel.css(front_sel)
-
-    #get headline selectors
-    headline_xpath = '//article/div/a[contains(@class,"dre-item")]'
-    headlines = front_page.xpath(headline_xpath)
+    soup = bs(html, "html.parser")
+    
+    #get headline soups
+    headlines = soup.find_all("a", class_=re.compile("teaser__title-link"))
 
     #extract headlines based on keyword
     headlines_ext = list()
@@ -139,21 +111,29 @@ def front_page_check(url, keywords, url_list):
     for headline in headlines:
         if keyword_check(keywords, headline) == True:
             headlines_ext.append(headline)
+
+    #get links from extracted headlines
+    links_ext = list()
+    for headline in headlines_ext:
+        link = "https://www.berlingske.dk" + headline['href']
+        links_ext.append(link)
+    links_ext = list(filter(None, links_ext))
     
     #get article info
     articles = []
 
-    for headline in headlines_ext:
-        link = get_articlelink(headline)
+    for link in links_ext:
         if not link in url_list:
-            art_info = get_article_info(headline, keywords = keywords)
+            art_info = get_article_info(link, keywords = keywords)
             articles.append(art_info)
             url_list.append(link)
-    
+            time_out = random.uniform(0.5, 2.0)
+            time.sleep(time_out)
+            
     return(articles)
 
 
-def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
+def headline_watch(keywords, datadir, source_url = 'https://www.berlingske.dk/nyheder/politik/'):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
@@ -191,7 +171,7 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
     
     while i > 0:
         try:
-            response = requests.get(main_url, timeout = 5.0)
+            response = requests.get(source_url, timeout = 5.0)
             break
         except:
             i = i - 1
@@ -201,7 +181,7 @@ def headline_watch(keywords, datadir, main_url = 'https://www.berlingske.dk/'):
     
     if i > 0: 
         if response.status_code == 200:
-            articles = front_page_check(url = main_url, keywords = keywords, url_list = url_list)
+            articles = front_page_check(url = source_url, keywords = keywords, url_list = url_list)
 
             if len(articles) != 0:
                 with open(datadir + data_filename, 'r') as f:

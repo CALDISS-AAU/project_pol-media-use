@@ -1,8 +1,10 @@
-import sys
+import os, sys
+parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__name__)))
+modulesdir = os.path.join(parentdir, "modules")
 import time
 from datetime import datetime
 from random import randint
-sys.path.append('../modules')
+sys.path.append(modulesdir)
 import berlingske_fp_watcher as berwatch
 import politiken_fp_watcher as polwatch
 import dr_fp_watcher as drwatch
@@ -16,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 def main():
     #Setting up e-mail notifications
-    s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
 
     msg = MIMEMultipart()
     
@@ -25,16 +26,17 @@ def main():
     msg['Subject'] = "Error running headline_watcher"
     
     #Parameters for watch
-    keywords = ['klima', 'miljø', 'klimalov', 'grøn', 'bæredygtig', 'fossil', 'olie']
+    keywords = [r".*"]
 
     datadir = "../data/"
 
-    end_time = datetime(2020, 10, 2)
+    end_time = datetime(2020, 10, 16)
 
     dt_now = datetime.now()
     
     #Watch running
     while dt_now < end_time:
+        s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
         s.starttls()
         s.login("kgk@adm.aau.dk", "a94Q187jgzb0vWEO")
         
