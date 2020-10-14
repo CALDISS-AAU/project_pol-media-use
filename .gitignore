@@ -1,12 +1,7 @@
 */*.ipynb_checkpoints
 */.ipynb_checkpoints
 personal/
-data/tweets/*.csv
-data/tweets/*.txt
-data/*.txt
-data/*.csv
-data/*/*.csv
-data/*/*.txt
+data/
 */nohup.out
 nohup.out
 data/data/
