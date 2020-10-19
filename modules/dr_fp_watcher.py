@@ -116,7 +116,7 @@ def front_page_check(url, keywords, url_list):
             link = "https://www.dr.dk" + headline['href']
             links_ext.append(link)
         else:
-            links_ext.append(headline['href']
+            links_ext.append(headline['href'])
     links_ext = list(filter(None, links_ext))
     links_ext = list(set(links_ext))
 
