@@ -112,8 +112,11 @@ def front_page_check(url, keywords, url_list):
     #get links from extracted headlines
     links_ext = list()
     for headline in headlines_ext:
-        link = "https://www.dr.dk" + headline['href']
-        links_ext.append(link)
+        if "www.dr.dk" not in headline['href']:
+            link = "https://www.dr.dk" + headline['href']
+            links_ext.append(link)
+        else:
+            links_ext.append(headline['href']
     links_ext = list(filter(None, links_ext))
     links_ext = list(set(links_ext))
 
