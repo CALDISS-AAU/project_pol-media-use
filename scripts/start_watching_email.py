@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, sys
 parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__name__)))
 modulesdir = os.path.join(parentdir, "modules")
@@ -30,7 +32,7 @@ def main():
 
     datadir = "../data/"
 
-    end_time = datetime(2020, 10, 16)
+    end_time = datetime(2020, 12, 1)
 
     dt_now = datetime.now()
     
