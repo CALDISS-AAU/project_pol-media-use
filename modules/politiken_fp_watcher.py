@@ -115,7 +115,10 @@ def front_page_check(url, keywords, url_list):
     #get links from extracted headlines
     links_ext = list()
     for headline in headlines_ext:
-        links_ext.append(headline.a['href'])
+        try:
+            links_ext.append(headline.a['href'])
+        except:
+            continue
     links_ext = list(filter(None, links_ext))
     
     #get article info
