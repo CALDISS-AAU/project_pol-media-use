@@ -7,16 +7,15 @@ import time
 from datetime import datetime
 from random import randint
 sys.path.append(modulesdir)
-import berlingske_fp_watcher as berwatch
-import politiken_fp_watcher as polwatch
-import dr_fp_watcher as drwatch
-import tv2_fp_watcher as tv2watch
+import fp_watcher
 import logging
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 logger = logging.getLogger(__name__)
+
+
 
 def main():
     #Setting up e-mail notifications
@@ -27,6 +26,12 @@ def main():
     msg['To'] = 'kgk@adm.aau.dk'
     msg['Subject'] = "Error running headline_watcher"
     
+    #Setting up counter
+    ARTICLE_COUNTER = {"DR": 0,
+                   "Politiken": 0,
+                   "Berlingske": 0, 
+                   "TV2": 0}
+    
     #Parameters for watch
     keywords = [r".*"]
 
@@ -36,57 +41,37 @@ def main():
 
     dt_now = datetime.now()
     
+    sources = ["DR", "Politiken", "Berlingske", "TV2"]
+    
     #Watch running
     while dt_now < end_time:
         s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
         s.starttls()
         s.login("kgk@adm.aau.dk", "a94Q187jgzb0vWEO")
         
-        print("{time}: Checking Berlingske front page...".format(time = dt_now))
-        logger.info("Checking Berlingske front page...")
-        try:
-            berwatch.headline_watch(keywords = keywords, datadir = datadir)
-        except Exception as e:
-            logger.error("Failed to run watch on Berlingske: " + str(e))
-            message = "<p><i>Watch on Berlingske was halted with the following error:</i> <br /> <br /> {error}".format(error = e)
-            msg.attach(MIMEText(message, 'html'))
-
-            s.send_message(msg)   
-            
+        for source in sources:
+            print("{time}: Checking {source} front page...".format(time = dt_now, source = source))
+            logger.info("Checking {source} front page...", format(source = source))
+            try:
+                count = fp_watcher.headline_watch(source = source, keywords = keywords, datadir = datadir)
+            except Exception as e:
+                logger.error("Failed to run watch on {source}: ".format(source = source) + str(e))
+                message = "<p><i>Watch on {source} was halted with the following error:</i> <br /> <br /> {error}".format(source = source, error = e)
+                msg.attach(MIMEText(message, 'html'))
     
-        print("{time}: Checking Politiken front page...".format(time = dt_now))
-        logger.info("Checking Politiken front page...")
-        try:
-            polwatch.headline_watch(keywords = keywords, datadir = datadir)
-        except Exception as e:
-            logger.error("Failed to run watch on Politiken: " + str(e))
-            message = "<p><i>Watch on Politiken was halted with the following error:</i> <br /> <br /> {error}".format(error = e)
-            msg.attach(MIMEText(message, 'html'))
-
-            s.send_message(msg)   
-        
-        print("{time}: Checking DR front page...".format(time = dt_now))
-        logger.info("Checking DR front page...")
-        try:
-            drwatch.headline_watch(keywords = keywords, datadir = datadir)
-        except Exception as e:
-            logger.error("Failed to run watch on DR: " + str(e))
-            message = "<p><i>Watch on DR was halted with the following error:</i> <br /> <br /> {error}".format(error = e)
-            msg.attach(MIMEText(message, 'html'))
-
-            s.send_message(msg)   
-        
-        print("{time}: Checking TV2 front page...".format(time = dt_now))
-        logger.info("Checking TV2 front page...")
-        try:
-            tv2watch.headline_watch(keywords = keywords, datadir = datadir)
-        except Exception as e:
-            logger.error("Failed to run watch on TV2: " + str(e))
-            message = "<p><i>Watch on TV2 was halted with the following error:</i> <br /> <br /> {error}".format(error = e)
-            msg.attach(MIMEText(message, 'html'))
-
-            s.send_message(msg) 
+                s.send_message(msg)   
             
+            if count == 0:
+                ARTICLE_COUNTER[source] = ARTICLE_COUNTER[source] + 1
+            else:
+                ARTICLE_COUNTER[source] = 0
+            
+            if ARTICLE_COUNTER[source] >= 6:
+                message = "<p><i>Warning: Watch on {source} has run {n} times with 0 new articles found</i></p>.".format(source = source, n = ARTICLE_COUNTER[source])
+                msg.attach(MIMEText(message, 'html'))
+                
+                s.send_message(msg)
+                
         s.quit()
         
         time_out = randint(41*60, 62*60)
