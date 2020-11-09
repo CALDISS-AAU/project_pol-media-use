@@ -313,8 +313,8 @@ def headline_watch(source, keywords, datadir):
 
             print("{source} front page checked on {time}. {n} new articles found.".format(source = source, time = datetime.now(), n = len(articles)))
             logger.info("{source} front page checked on {time}. {n} new articles found.".format(source = source, time = datetime.now(), n = len(articles)))
-            return
+            return(len(articles))
     else:
         print("Error retrieving {source} front page on {time}. Skipping...".format(source = source, time = datetime.now()))
         logger.warning("Error retrieving {source} front page on {time}. Skipping...".format(source = source, time = datetime.now()))      
-        return
+        return(0)
