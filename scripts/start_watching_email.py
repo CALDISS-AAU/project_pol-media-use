@@ -51,7 +51,7 @@ def main():
         
         for source in sources:
             print("{time}: Checking {source} front page...".format(time = dt_now, source = source))
-            logger.info("Checking {source} front page...", format(source = source))
+            logger.info("Checking {source} front page...".format(source = source))
             try:
                 count = fp_watcher.headline_watch(source = source, keywords = keywords, datadir = datadir)
             except Exception as e:
