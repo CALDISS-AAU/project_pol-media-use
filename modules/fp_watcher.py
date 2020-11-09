@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup as bs
 import requests
 
 import os
-import datetime
+from datetime import datetime
 
 import re
 import time
@@ -16,8 +16,102 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-html_classes = {"DR Nyheder": "dre-teaser-title*", 
-                "Politiken": }
+PARAMS = {"DR": {"url": "https://www.dr.dk/nyheder/politik/",
+                 "heading_tag": "a",
+                 "heading_class_regex": "dre-teaser-title*"}, 
+          "Politiken": {"url": "https://politiken.dk/indland/politik/",
+                        "heading_tag":"h2",
+                        "heading_class_regex": "article-intro__title headline*"},
+          "Berlingske": {"url": "https://www.berlingske.dk/nyheder/politik/",
+                         "heading_tag": "a", 
+                         "heading_class_regex": "teaser__title-link"},
+          "TV2": {"url": "https://nyheder.tv2.dk/politik/",
+                  "heading_tag": "a",
+                  "heading_class_regex": "o-teaser_link"}
+                }
+
+SOURCES = ("DR", "Politiken", "Berlingske", "TV2")
+
+def get_title(soup):
+    try:
+        article_title = soup.title.get_text()
+    except:
+        article_title = ""
+        
+    return(article_title)
+
+
+def get_datetime(soup):
+    try:
+        article_datetime = soup.find("meta", attrs={"name": "article:published_time"})['content']
+    except:
+        try:
+            article_datetime = soup.find("meta", attrs={"property": "article:published_time"})['content']
+        except:
+            article_datetime = ""
+
+    return(article_datetime)
+
+
+def get_links_dr(headlines):
+    links = list()
+    for headline in headlines:
+        try:
+            if "www.dr.dk" not in headline['href']:
+                link = "https://www.dr.dk" + headline['href']
+            else:
+                link = headline['href']
+            links.append(link)
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
+
+
+def get_links_pol(headlines):
+    links = list()
+    for headline in headlines:
+        try:
+            links.append(headline.a['href'])
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
+
+
+def get_links_ber(headlines):
+    links = list()
+    for headline in headlines:
+        try:
+            link = "https://www.berlingske.dk" + headline['href']
+            links.append(link)
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
+
+
+def get_links_tv2(headlines):
+    links = list()
+    for headline in headlines:
+        try:
+            if "https:" not in headline['href']:
+                link = "https:" + headline['href']
+            else:
+                link = headline['href']
+            links.append(link)
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
 
 def keyword_check(keywords, headline):
     '''
@@ -36,7 +130,7 @@ def get_article_info(link, keywords, source, source_url):
     i = 3
     
     art_uuid = str(uuid.uuid4())
-    encounter_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+    encounter_time = datetime.now().strftime('%Y-%m-%d %H:%M')
     
     while i > 0:
         time_out = randint(2, 5)
@@ -51,11 +145,8 @@ def get_article_info(link, keywords, source, source_url):
             html = requests.get(link, timeout = 5.0).content
             soup = bs(html, "html.parser")
 
-            article_title = soup.title.get_text()
-            try:
-                article_datetime = soup.time['datetime']
-            except TypeError:
-                article_datetime = ''
+            article_title = get_title(soup)
+            article_datetime = get_datetime(soup)
 
             matches = list(compress(keywords, [keyword in article_title.lower() for keyword in keywords]))
 
@@ -69,7 +160,7 @@ def get_article_info(link, keywords, source, source_url):
             info['article_link'] = link
             info['article_datetime'] = article_datetime
             info['encounter_datetime'] = encounter_time
-            info['article_source'] = req.content
+            info['article_source'] = str(bs(req.content, "html.parser"))
             return(info)
         else:
             i = i -1
@@ -91,20 +182,23 @@ def get_article_info(link, keywords, source, source_url):
             info['article_source'] = ''
             return(info)
 
-def front_page_check(source, source_url, keywords, url_list):
+def front_page_check(source, keywords, url_list):
     '''
     Creates dictionary of headlines with various information.
     '''    
+    #get parameters
+    if source not in SOURCES:
+        raise Exception("{source} is not a valid source. Valid sources are {sources}.".format(source = source, sources = re.sub(r'\(|\)', '', str(SOURCES))))
+        
+    page_params = PARAMS[source]
+    
     #selector of main page
-    url = source_url
+    url = page_params['url']
     html = requests.get(url, timeout = 5.0).content
     soup = bs(html, "html.parser")
 
     #get headline soups
-    if source == "DR Nyheder":
-        headlines = soup.find_all("a", class_=re.compile("dre-teaser-title*"))
-    elif source == "Politiken":
-        headlines = soup.find_all("h2", class_=re.compile("article-intro__title")
+    headlines = soup.find_all(page_params['heading_tag'], class_=re.compile(page_params['heading_class_regex']))
 
     #extract headlines based on keyword
     headlines_ext = list()
@@ -114,35 +208,49 @@ def front_page_check(source, source_url, keywords, url_list):
             headlines_ext.append(headline)
 
     #get links from extracted headlines
-    links_ext = list()
-    for headline in headlines_ext:
-        link = "https://www.dr.dk" + headline['href']
-        links_ext.append(link)
-    links_ext = list(filter(None, links_ext))
-    links_ext = list(set(links_ext))
+    if source == "DR":
+        links_ext = get_links_dr(headlines_ext)
+    elif source == "Politiken":
+        links_ext = get_links_pol(headlines_ext)
+    elif source == "Berlingske":
+        links_ext = get_links_ber(headlines_ext)
+    elif source == "TV2":
+        links_ext = get_links_tv2(headlines_ext)
 
     #get article info
     articles = []
 
     for link in links_ext:
         if not link in url_list:
-            art_info = get_article_info(link = link, keywords = keywords)
+            art_info = get_article_info(link = link, keywords = keywords, source = source, source_url = page_params['url'])
             articles.append(art_info)
             url_list.append(link)
             
     return(articles)
 
-def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indland'):
+def headline_watch(source, keywords, datadir):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
+    
+    #get parameters
+    if source not in SOURCES:
+        raise Exception("{source} is not a valid source. Valid sources are {sources}.".format(source = source, sources = re.sub(r'\(|\)', '', str(SOURCES))))
+        
+    page_params = PARAMS[source]
+    
+    
     keywords = keywords
-
+    
+    source_url = page_params['url']
+    
     urldir = datadir + "urls/"
+    
+    articlesdir = datadir + "articles/"
 
-    urllist_filename = "dr_article_urls.txt"
+    urllist_filename = source.lower() + "_article_urls.txt"
 
-    data_filename = "dr_articles.json"
+    data_filename = source.lower() + "_articles.json"
 
     url_list = []
 
@@ -158,19 +266,21 @@ def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indl
             os.mkdir(urldir)
 
     try:
-        with open(datadir + data_filename, 'r') as f:
+        with open(articlesdir + data_filename, 'r') as f:
             f.close()
     except IOError:
         print("No existing data file. Creating new file {}".format(data_filename))
         logger.info("No existing data file. Creating new file {}".format(data_filename))
-        with open(datadir + data_filename, 'w') as f:
+        if not os.path.isdir(articlesdir):
+            os.mkdir(articlesdir)
+        with open(articlesdir + data_filename, 'w') as f:
             json.dump([], f)
 
     i = 3
 
     while i > 0:
         try:
-            response = requests.get(main_url, timeout = 5.0)
+            response = requests.get(source_url, timeout = 5.0)
             break
         except:
             i = i - 1
@@ -180,14 +290,14 @@ def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indl
 
     if i > 0: 
         if response.status_code == 200:
-            articles = front_page_check(url = main_url, keywords = keywords, url_list = url_list)
+            articles = front_page_check(source = source, keywords = keywords, url_list = url_list)
 
             if len(articles) != 0:
-                with open(datadir + data_filename, 'r') as f:
+                with open(articlesdir + data_filename, 'r') as f:
                     heads = json.load(f)
                     heads = heads + articles
                     f.close()
-                with open(datadir + data_filename, 'w') as file:
+                with open(articlesdir + data_filename, 'w') as file:
                     json.dump(heads, file)
                 file.close()
 
@@ -201,10 +311,10 @@ def headline_watch(keywords, datadir, main_url = 'https://www.dr.dk/nyheder/indl
                     f.write(url + "\n")
                 f.close()
 
-            print("DR front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
-            logger.info("DR front page checked on {time}. {n} new articles found.".format(time = datetime.datetime.now(), n = len(articles)))
+            print("{source} front page checked on {time}. {n} new articles found.".format(source = source, time = datetime.now(), n = len(articles)))
+            logger.info("{source} front page checked on {time}. {n} new articles found.".format(source = source, time = datetime.now(), n = len(articles)))
             return
     else:
-        print("Error retrieving DR front page on {time}. Skipping...".format(time = datetime.datetime.now()))
-        logger.warning("Error retrieving DR front page on {time}. Skipping...".format(time = datetime.datetime.now()))      
+        print("Error retrieving {source} front page on {time}. Skipping...".format(source = source, time = datetime.now()))
+        logger.warning("Error retrieving {source} front page on {time}. Skipping...".format(source = source, time = datetime.now()))      
         return
