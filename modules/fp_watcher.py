@@ -100,14 +100,37 @@ def get_links_ber(headlines):
 def get_links_tv2(headlines):
     links = list()
     for headline in headlines:
-        try:
-            if "https:" not in headline['href']:
-                link = "https:" + headline['href']
-            else:
-                link = headline['href']
-            links.append(link)
-        except:
+        
+        tag_name = headline.name
+        headline_parent = headline.parent
+        section_check = False
+                
+        
+        while tag_name != 'html':
+            try:
+                if "g-w66pct_l" in headline_parent['class']:
+                    section_check = True
+                    break
+                else:
+                    headline_parent = headline_parent.parent
+                    tag_name = headline_parent.name
+            except:
+                headline_parent = headline_parent.parent
+                tag_name = headline_parent.name
+            
+        if section_check == True:
+            try:
+                if "https:" not in headline['href']:
+                    link = "https:" + headline['href']
+                else:
+                    link = headline['href']
+                links.append(link)
+            except:
+                continue
+            
+        else:
             continue
+        
     links = list(filter(None, links))
     links = list(set(links))
     
