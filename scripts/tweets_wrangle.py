@@ -12,15 +12,15 @@ import_cols = ['created_at', 'id', 'full_text', 'entities', 'user', 'retweeted_s
 user_infos = ['id', 'name', 'screen_name', 'location', 'description', 'url', 'followers_count', 'created_at', 'verified']
 keep_cols = ['created_at', 'id', 'full_text', 'is_quote_status', 'retweet_count', 'favorite_count', 'favorited', 'retweeted',
             'is_retweet', 'hashtags', 'user_mentions', 'urls'] + ["user_" + user_info for user_info in user_infos]
-datapath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200115.gz")
-savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_flattened_20200115.gz")
+datapath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200127.gz")
+savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_flattened_20200127.gz")
 
 def fix_dicts(string):
     if not isinstance(string, dict):
         string_as_dict = ast.literal_eval(string)
         return(string_as_dict)
     else:
-        return
+        return(string)
 
 def unnest_hashtags(hashtags):
     if isinstance(hashtags, list):
@@ -30,6 +30,7 @@ def unnest_hashtags(hashtags):
         return
 
 def process_df(df, keep_cols = keep_cols):
+    df = df.reset_index()
     df['is_retweet'] = df['retweeted_status'].notna()
     df['entities'] = df['entities'].apply(fix_dicts)
     df['user'] = df['user'].apply(fix_dicts)

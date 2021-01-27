@@ -10,10 +10,11 @@ datafiles = [join(datapath,f) for f in listdir(datapath) if isfile(join(datapath
 datafiles = [datafile for datafile in datafiles if datafile.endswith('.ndjson')]
 
 def read_datafiles(datafiles):
-    df = pd.DataFrame()
+    records_all = list()
     for datafile in datafiles:
         records = map(json.loads, open(datafile, encoding = 'utf-8'))
-        df = df.append(pd.DataFrame.from_records(records), ignore_index = True)
+        records_all = records_all + list(records)
+    df = pd.DataFrame.from_records(records_all)
     return(df)
 
 def split_job(datafiles):
@@ -38,7 +39,7 @@ def split_job(datafiles):
 
 def run_and_save():
     tweets_df = split_job(datafiles)
-    savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200115.gz")
+    savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200127.gz")
     tweets_df.to_csv(savepath, compression='gzip')
 
 if __name__ == '__main__':
