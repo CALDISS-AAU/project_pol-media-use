@@ -37,7 +37,7 @@ def main():
 
     datadir = "../data/"
 
-    end_time = datetime(2020, 12, 1)
+    end_time = datetime(2021, 3, 5)
 
     dt_now = datetime.now()
     
@@ -46,7 +46,9 @@ def main():
     #Watch running
     while dt_now < end_time:
         s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
+        s.ehlo()
         s.starttls()
+        s.ehlo()
         s.login("kgk@adm.aau.dk", "a94Q187jgzb0vWEO")
         
         for source in sources:
@@ -66,7 +68,7 @@ def main():
             else:
                 ARTICLE_COUNTER[source] = 0
             
-            if ARTICLE_COUNTER[source] >= 6:
+            if ARTICLE_COUNTER[source] >= 36:
                 message = "<p><i>Warning: Watch on {source} has run {n} times with 0 new articles found</i></p>.".format(source = source, n = ARTICLE_COUNTER[source])
                 msg.attach(MIMEText(message, 'html'))
                 
@@ -74,7 +76,7 @@ def main():
                 
         s.quit()
         
-        time_out = randint(41*60, 62*60)
+        time_out = randint(122*60, 142*60)
         time.sleep(time_out)
     
         dt_now = datetime.now()
