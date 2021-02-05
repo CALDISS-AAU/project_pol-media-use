@@ -57,7 +57,7 @@ def get_links_dr(headlines):
     links = list()
     for headline in headlines:
         try:
-            if "www.dr.dk" not in headline['href']:
+            if "dr.dk" not in headline['href']:
                 link = "https://www.dr.dk" + headline['href']
             else:
                 link = headline['href']
