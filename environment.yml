@@ -223,7 +223,7 @@ dependencies:
     - async-timeout==3.0.1
     - beautifulsoup4==4.9.2
     - cchardet==2.1.6
-    - da-core-news-sm==2.3.0
+#    - da-core-news-sm==2.3.0
     - elasticsearch==7.9.1
     - fake-useragent==0.1.11
     - geographiclib==1.50
