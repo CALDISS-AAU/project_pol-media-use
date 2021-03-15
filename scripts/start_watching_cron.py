@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-import os, sys
+import os
+import sys
 
-projectdir = os.path.join("home", "ubuntu", "project_pol-media-use")
+projectdir = os.path.join("project_pol-media-use")
 modulesdir = os.path.join(projectdir, "modules")
 datadir = os.path.join(projectdir, "data")
 logdir = os.path.join(projectdir, "logs")
 
-sys.path.append(modulesdir)
+sys.path.insert(0, modulesdir)
+
 import time
 from datetime import datetime
 import fp_watcher
