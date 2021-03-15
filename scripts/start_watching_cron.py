@@ -19,21 +19,21 @@ from email.mime.text import MIMEText
 logger = logging.getLogger(__name__)
 
 def main():
-    
-    #Setting up counter
-    ARTICLE_COUNTER = {"DR": 0,
-                   "Politiken": 0,
-                   "Berlingske": 0, 
-                   "TV2": 0,
-                   "EB": 0,
-                   "JP": 0}
-    
-    #Parameters for watch
-    keywords = [r".*"]
+	
+	#Setting up counter
+	ARTICLE_COUNTER = {"DR": 0,
+				   "Politiken": 0,
+				   "Berlingske": 0, 
+				   "TV2": 0,
+				   "EB": 0,
+				   "JP": 0}
+	
+	#Parameters for watch
+	keywords = [r".*"]
 
-    sources = ["DR", "Politiken", "Berlingske", "TV2", "EB", "JP"]
-    
-    dt_now = datetime.now()
+	sources = ["DR", "Politiken", "Berlingske", "TV2", "EB", "JP"]
+	
+	dt_now = datetime.now()
 
 	#Setting up e-mail notifications
 
@@ -71,12 +71,12 @@ def main():
 			msg.attach(MIMEText(message, 'html'))
 			
 			s.send_message(msg)
-                
+				
 #	s.quit()
-    
+	
 
 if __name__ == '__main__':
-    FORMAT = '%(asctime)-15s %(message)s'
+	FORMAT = '%(asctime)-15s %(message)s'
 	logout = os.path.join(logdir, 'watcher.log')
-    logging.basicConfig(filename=logout, filemode='a', level=logging.INFO, format = FORMAT)
-    main()
+	logging.basicConfig(filename=logout, filemode='a', level=logging.INFO, format = FORMAT)
+	main()
