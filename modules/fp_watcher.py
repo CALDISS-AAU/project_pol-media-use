@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup as bs
 
 import requests
+from urllib.parse import urljoin
 
 import os
 from datetime import datetime
@@ -27,10 +28,16 @@ PARAMS = {"DR": {"url": "https://www.dr.dk/nyheder/politik/",
                          "heading_class_regex": "teaser__title-link"},
           "TV2": {"url": "https://nyheder.tv2.dk/politik/",
                   "heading_tag": "a",
-                  "heading_class_regex": "o-teaser_link"}
+                  "heading_class_regex": "o-teaser_link"},
+          "EB": {"url": "https://ekstrabladet.dk/nyheder/politik/",
+                 "heading_tag": "a",
+                 "heading_class_regex": "card"},
+          "JP": {"url": "https://jyllands-posten.dk/politik/",
+                 "heading_tag": "a",
+                 "heading_class_regex": "article-teaser-heading"}
                 }
 
-SOURCES = ("DR", "Politiken", "Berlingske", "TV2")
+SOURCES = tuple(PARAMS.keys())
 
 def get_title(soup):
     try:
@@ -44,9 +51,9 @@ def get_title(soup):
 def get_datetime(soup):
     try:
         article_datetime = soup.find("meta", attrs={"name": "article:published_time"})['content']
-    except:
+    except (TypeError, KeyError):
         try:
-            article_datetime = soup.find("meta", attrs={"property": "article:published_time"})['content']
+            article_datetime = soup.find("meta", attrs={'property': re.compile('article:published_time')})['content']
         except:
             article_datetime = ""
 
@@ -57,10 +64,7 @@ def get_links_dr(headlines):
     links = list()
     for headline in headlines:
         try:
-            if "dr.dk" not in headline['href']:
-                link = "https://www.dr.dk" + headline['href']
-            else:
-                link = headline['href']
+            link = urljoin("https://www.dr.dk", headline['href'])
             links.append(link)
         except:
             continue
@@ -74,7 +78,8 @@ def get_links_pol(headlines):
     links = list()
     for headline in headlines:
         try:
-            links.append(headline.a['href'])
+            link = urljoin("https://politiken.dk", headline.a['href'])
+            links.append(link)
         except:
             continue
     links = list(filter(None, links))
@@ -87,7 +92,7 @@ def get_links_ber(headlines):
     links = list()
     for headline in headlines:
         try:
-            link = "https://www.berlingske.dk" + headline['href']
+            link = urljoin("https://www.berlingske.dk", headline['href'])
             links.append(link)
         except:
             continue
@@ -120,10 +125,7 @@ def get_links_tv2(headlines):
             
         if section_check == True:
             try:
-                if "https:" not in headline['href']:
-                    link = "https:" + headline['href']
-                else:
-                    link = headline['href']
+                link = urljoin("https://nyheder.tv2.dk/", headline['href'])
                 links.append(link)
             except:
                 continue
@@ -136,6 +138,56 @@ def get_links_tv2(headlines):
     
     return(links)
 
+def get_links_eb(pagesoup, page_params, keywords = [r".*"]):
+    section_soup = pagesoup.find('div', class_ = 'flex flex-wrap--wrap flex-justify--between') 
+    
+    #get headline soups
+    headlines = section_soup.find_all(page_params['heading_tag'], class_=re.compile(page_params['heading_class_regex']))
+
+    #extract headlines based on keyword
+    headlines_ext = list()
+
+    for headline in headlines:
+        if keyword_check(keywords, headline) == True:
+            headlines_ext.append(headline)
+       
+    links = list()
+    for headline in headlines_ext:
+        try:
+            link = urljoin("https://ekstrabladet.dk/", headline['href'])
+            links.append(link)
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
+        
+def get_links_jp(pagesoup, page_params, keywords = [r".*"]):
+    section_soup = pagesoup.find('section', id = 'section_a_zone_3')
+    
+    #get headline soups
+    headlines = section_soup.find_all(page_params['heading_tag'], class_=re.compile(page_params['heading_class_regex']))
+
+    #extract headlines based on keyword
+    headlines_ext = list()
+
+    for headline in headlines:
+        if keyword_check(keywords, headline) == True:
+            headlines_ext.append(headline)
+       
+    links = list()
+    for headline in headlines_ext:
+        try:
+            link = urljoin("https://jyllands-posten.dk/", headline['href'])
+            links.append(link)
+        except:
+            continue
+    links = list(filter(None, links))
+    links = list(set(links))
+    
+    return(links)
+    
 def keyword_check(keywords, headline):
     '''
     Checks whether headline contains keywords.
@@ -156,7 +208,7 @@ def get_article_info(link, keywords, source, source_url):
     encounter_time = datetime.now().strftime('%Y-%m-%d %H:%M')
     
     while i > 0:
-        time_out = randint(2, 5)
+        time_out = random.uniform(1, 2)
         time.sleep(time_out)
         req = requests.get(link, timeout = 5.0)
         response_code = req.status_code
@@ -239,6 +291,10 @@ def front_page_check(source, keywords, url_list):
         links_ext = get_links_ber(headlines_ext)
     elif source == "TV2":
         links_ext = get_links_tv2(headlines_ext)
+    elif source == "EB":
+        links_ext = get_links_eb(soup, page_params)
+    elif source == "JP":
+        links_ext = get_links_jp(soup, page_params)
 
     #get article info
     articles = []
