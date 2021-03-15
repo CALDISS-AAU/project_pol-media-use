@@ -23,7 +23,9 @@ def main():
     ARTICLE_COUNTER = {"DR": 0,
                    "Politiken": 0,
                    "Berlingske": 0, 
-                   "TV2": 0}
+                   "TV2": 0,
+                   "EB": 0,
+                   "JP": 0}
     
     #Parameters for watch
     keywords = [r".*"]
@@ -34,7 +36,7 @@ def main():
 
     dt_now = datetime.now()
     
-    sources = ["DR", "Politiken", "Berlingske", "TV2"]
+    sources = ["DR", "Politiken", "Berlingske", "TV2", "EB", "JP"]
     
     #Watch running
     while dt_now < end_time:
