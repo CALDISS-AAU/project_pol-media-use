@@ -33,7 +33,7 @@ def main():
 
     sources = ["DR", "Politiken", "Berlingske", "TV2", "EB", "JP"]
     
-	dt_now = datetime.now()
+    dt_now = datetime.now()
 
 	#Setting up e-mail notifications
 
