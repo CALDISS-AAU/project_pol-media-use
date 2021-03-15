@@ -323,9 +323,9 @@ def headline_watch(source, keywords, datadir):
     
     source_url = page_params['url']
     
-    urldir = datadir + "urls/"
+    urldir = os.path.join(datadir, "urls")
     
-    articlesdir = datadir + "articles/"
+    articlesdir = os.path.join(datadir, "articles")
 
     urllist_filename = source.lower() + "_article_urls.txt"
 
@@ -334,7 +334,7 @@ def headline_watch(source, keywords, datadir):
     url_list = []
 
     try:
-        with open(urldir + urllist_filename, 'r') as f:
+        with open(os.path.join(urldir, urllist_filename), 'r') as f:
             for line in f:
                 url_list.append(line.strip())
             f.close()
@@ -345,14 +345,14 @@ def headline_watch(source, keywords, datadir):
             os.mkdir(urldir)
 
     try:
-        with open(articlesdir + data_filename, 'r') as f:
+        with open(os.path.join(articlesdir, data_filename), 'r') as f:
             f.close()
     except IOError:
         print("No existing data file. Creating new file {}".format(data_filename))
         logger.info("No existing data file. Creating new file {}".format(data_filename))
         if not os.path.isdir(articlesdir):
             os.mkdir(articlesdir)
-        with open(articlesdir + data_filename, 'w') as f:
+        with open(os.path.join(articlesdir, data_filename), 'w') as f:
             json.dump([], f)
 
     i = 3
@@ -372,11 +372,11 @@ def headline_watch(source, keywords, datadir):
             articles = front_page_check(source = source, keywords = keywords, url_list = url_list)
 
             if len(articles) != 0:
-                with open(articlesdir + data_filename, 'r') as f:
+                with open(os.path.join(articlesdir, data_filename), 'r') as f:
                     heads = json.load(f)
                     heads = heads + articles
                     f.close()
-                with open(articlesdir + data_filename, 'w') as file:
+                with open(os.path.join(articlesdir, data_filename), 'w') as file:
                     json.dump(heads, file)
                 file.close()
 
@@ -385,7 +385,7 @@ def headline_watch(source, keywords, datadir):
 
             url_list = list(set(url_list))
 
-            with open(urldir + urllist_filename, 'w') as f:
+            with open(os.path.join(urldir, urllist_filename), 'w') as f:
                 for url in url_list:
                     f.write(url + "\n")
                 f.close()
