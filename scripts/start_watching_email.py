@@ -18,13 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    #Setting up e-mail notifications
-
-    msg = MIMEMultipart()
-    
-    msg['From'] = 'kristian@mail.bot'
-    msg['To'] = 'kgk@adm.aau.dk'
-    msg['Subject'] = "Error running headline_watcher"
     
     #Setting up counter
     ARTICLE_COUNTER = {"DR": 0,
@@ -37,7 +30,7 @@ def main():
 
     datadir = "../data/"
 
-    end_time = datetime(2021, 3, 5)
+    end_time = datetime(2021, 3, 19)
 
     dt_now = datetime.now()
     
@@ -45,6 +38,14 @@ def main():
     
     #Watch running
     while dt_now < end_time:
+        #Setting up e-mail notifications
+
+        msg = MIMEMultipart()
+    
+        msg['From'] = 'kristian@mail.bot'
+        msg['To'] = 'kgk@adm.aau.dk'
+        msg['Subject'] = "Error running headline_watcher"
+
         s = smtplib.SMTP('smtp-relay.sendinblue.com', 587)
         s.ehlo()
         s.starttls()
@@ -58,7 +59,7 @@ def main():
                 count = fp_watcher.headline_watch(source = source, keywords = keywords, datadir = datadir)
             except Exception as e:
                 logger.error("Failed to run watch on {source}: ".format(source = source) + str(e))
-                message = "<p><i>Watch on {source} was halted with the following error:</i> <br /> <br /> {error}".format(source = source, error = e)
+                message = "<p><i>Watch on {source} was halted with the following error:</i> <br /> <br /> {error}</p>".format(source = source, error = e)
                 msg.attach(MIMEText(message, 'html'))
     
                 s.send_message(msg)   
@@ -74,7 +75,7 @@ def main():
                 
                 s.send_message(msg)
                 
-        s.quit()
+#        s.quit()
         
         time_out = randint(122*60, 142*60)
         time.sleep(time_out)
