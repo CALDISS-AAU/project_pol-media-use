@@ -79,7 +79,7 @@ def main():
             
             s.send_message(msg)
         
-        with open(os.path.join(logdir, 'article_counter.json', 'w')) as f:
+        with open(os.path.join(logdir, 'article_counter.json'), 'w') as f:
             json.dump(ARTICLE_COUNTER, f)
         
 #    s.quit()
