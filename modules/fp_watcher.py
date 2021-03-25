@@ -294,11 +294,11 @@ def front_page_check(source, keywords, url_list, get_source = False):
     elif source == "Berlingske":
         links_ext = get_links_ber(headlines_ext)
     elif source == "TV2":
-        links_ext = get_links_tv2(headlines_ext)
+        links_ext = get_links_tv2(soup, page_params, keywords = keywords)
     elif source == "EB":
-        links_ext = get_links_eb(soup, page_params)
+        links_ext = get_links_eb(soup, page_params, keywords = keywords)
     elif source == "JP":
-        links_ext = get_links_jp(soup, page_params)
+        links_ext = get_links_jp(soup, page_params, keywords = keywords)
 
     #get article info
     articles = []
