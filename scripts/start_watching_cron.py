@@ -10,6 +10,7 @@ logdir = os.path.join(projectdir, "logs")
 
 sys.path.insert(0, modulesdir)
 
+import json
 import time
 from datetime import datetime
 import fp_watcher
@@ -23,12 +24,16 @@ logger = logging.getLogger(__name__)
 def main():
 	
 	#Setting up counter
-	ARTICLE_COUNTER = {"DR": 0,
-				   "Politiken": 0,
-				   "Berlingske": 0, 
-				   "TV2": 0,
-				   "EB": 0,
-				   "JP": 0}
+    if os.path.isfile(os.path.join(logdir, 'article_counter.json')):
+        with open(os.path.join(logdir, 'article_counter.json'), 'r') as f:
+            ARTICLE_COUNTER = json.load(f)
+    else:
+        ARTICLE_COUNTER = {"DR": 0,
+                       "Politiken": 0,
+                       "Berlingske": 0, 
+                       "TV2": 0,
+                       "EB": 0,
+                       "JP": 0}
 	
 	#Parameters for watch
 	keywords = [r".*"]
@@ -73,7 +78,10 @@ def main():
 			msg.attach(MIMEText(message, 'html'))
 			
 			s.send_message(msg)
-				
+		
+		with open(os.path.join(logdir, 'article_counter.json', 'w')) as f:
+            json.dump(ARTICLE_COUNTER, f)
+        
 #	s.quit()
 	
 
