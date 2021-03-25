@@ -116,7 +116,7 @@ def get_links_tv2(pagesoup, page_params, keywords = [r".*"]):
     #get headline soups
     headlines = []
     for div_soup in div_soups:
-        div_headlines = div_soup.find_all(page_params['TV2']['heading_tag'], class_ = re.compile(page_params['TV2']['heading_class_regex']))
+        div_headlines = div_soup.find_all(page_params['heading_tag'], class_ = re.compile(page_params['heading_class_regex']))
         headlines = headlines + div_headlines
 
     #extract headlines based on keyword
