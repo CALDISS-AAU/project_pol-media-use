@@ -21,9 +21,16 @@ from email.mime.text import MIMEText
 
 logger = logging.getLogger(__name__)
 
+if not os.path.isdir(datadir):
+    os.mkdir(datadir)
+
+if not os.path.isdir(logdir):
+    os.mkdir(logdir)
+
 def main():
     
     #Setting up counter
+    count = 0
     if os.path.isfile(os.path.join(logdir, 'article_counter.json')):
         with open(os.path.join(logdir, 'article_counter.json'), 'r') as f:
             ARTICLE_COUNTER = json.load(f)
