@@ -102,41 +102,42 @@ def get_links_ber(headlines):
     return(links)
 
 
-def get_links_tv2(headlines):
-    links = list()
+def get_links_tv2(pagesoup, page_params, keywords = [r".*"]):
+    
+    # extract relevant sections soups
+    section_soups = pagesoup.find_all('section', class_ = "g-gutter")
+    div_soups = []
+    for section_soup in section_soups[0:2]:
+        div_soup = section_soup.find('div')
+        div_soups.append(div_soup)
+
+    div_soups.append(section_soups[2])
+
+    #get headline soups
+    headlines = []
+    for div_soup in div_soups:
+        div_headlines = div_soup.find_all(page_params['TV2']['heading_tag'], class_ = re.compile(page_params['TV2']['heading_class_regex']))
+        headlines = headlines + div_headlines
+
+    #extract headlines based on keyword
+    headlines_ext = list()
+
     for headline in headlines:
-        
-        tag_name = headline.name
-        headline_parent = headline.parent
-        section_check = False
-                
-        
-        while tag_name != 'html':
-            try:
-                if "g-w66pct_l" in headline_parent['class']:
-                    section_check = True
-                    break
-                else:
-                    headline_parent = headline_parent.parent
-                    tag_name = headline_parent.name
-            except:
-                headline_parent = headline_parent.parent
-                tag_name = headline_parent.name
-            
-        if section_check == True:
-            try:
-                link = urljoin("https://nyheder.tv2.dk/", headline['href'])
-                links.append(link)
-            except:
-                continue
-            
-        else:
+        if keyword_check(keywords, headline) == True:
+            headlines_ext.append(headline)
+       
+    links = list()
+    for headline in headlines_ext:
+        try:
+            link = urljoin("https://nyheder.tv2.dk/", headline['href'])
+            links.append(link)
+        except:
             continue
-        
     links = list(filter(None, links))
     links = list(set(links))
     
     return(links)
+
 
 def get_links_eb(pagesoup, page_params, keywords = [r".*"]):
     section_soup = pagesoup.find('div', class_ = 'flex flex-wrap--wrap flex-justify--between') 
@@ -198,7 +199,7 @@ def keyword_check(keywords, headline):
     else:
         return False
     
-def get_article_info(link, keywords, source, source_url):
+def get_article_info(link, keywords, source, source_url, get_source = False):
     '''
     Creates a dictionary of information from a headline.
     '''
@@ -235,7 +236,10 @@ def get_article_info(link, keywords, source, source_url):
             info['article_link'] = link
             info['article_datetime'] = article_datetime
             info['encounter_datetime'] = encounter_time
-            info['article_source'] = str(bs(req.content, "html.parser"))
+            if get_source:
+                info['article_source'] = str(bs(req.content, "html.parser"))
+            else:
+                info['article_source'] = ''
             return(info)
         else:
             i = i -1
@@ -257,7 +261,7 @@ def get_article_info(link, keywords, source, source_url):
             info['article_source'] = ''
             return(info)
 
-def front_page_check(source, keywords, url_list):
+def front_page_check(source, keywords, url_list, get_source = False):
     '''
     Creates dictionary of headlines with various information.
     '''    
@@ -301,13 +305,13 @@ def front_page_check(source, keywords, url_list):
 
     for link in links_ext:
         if not link in url_list:
-            art_info = get_article_info(link = link, keywords = keywords, source = source, source_url = page_params['url'])
+            art_info = get_article_info(link = link, keywords = keywords, source = source, source_url = page_params['url'], get_source = get_source)
             articles.append(art_info)
             url_list.append(link)
             
     return(articles)
 
-def headline_watch(source, keywords, datadir):
+def headline_watch(source, keywords, datadir, get_source = False):
     '''
     Checks the frontpage and stores info about headlines matching keywords.
     '''
@@ -369,7 +373,7 @@ def headline_watch(source, keywords, datadir):
 
     if i > 0: 
         if response.status_code == 200:
-            articles = front_page_check(source = source, keywords = keywords, url_list = url_list)
+            articles = front_page_check(source = source, keywords = keywords, url_list = url_list, get_source = get_source)
 
             if len(articles) != 0:
                 with open(os.path.join(articlesdir, data_filename), 'r') as f:
