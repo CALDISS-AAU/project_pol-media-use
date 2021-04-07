@@ -52,7 +52,7 @@ with open(os.path.join(datapath, ber_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "Berlingske", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Berlingske", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, ber_outname), 'w', encoding = 'utf-8') as f:
@@ -65,7 +65,7 @@ with open(os.path.join(datapath, dr_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "DR", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "DR", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, dr_outname), 'w', encoding = 'utf-8') as f:
@@ -78,7 +78,7 @@ with open(os.path.join(datapath, eb_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "EB", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "EB", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, eb_outname), 'w', encoding = 'utf-8') as f:
@@ -91,7 +91,7 @@ with open(os.path.join(datapath, jp_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "JP", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "JP", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, jp_outname), 'w', encoding = 'utf-8') as f:
@@ -104,7 +104,7 @@ with open(os.path.join(datapath, pol_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "Politiken", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Politiken", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, pol_outname), 'w', encoding = 'utf-8') as f:
@@ -117,7 +117,7 @@ with open(os.path.join(datapath, tv2_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "TV2", chrome_options = chrome_options))
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "TV2", chrome_options = chrome_options)
     time.sleep(0.5)
 
 with open(os.path.join(outpath, tv2_outname), 'w', encoding = 'utf-8') as f:
