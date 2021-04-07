@@ -39,7 +39,7 @@ def get_arttext(link, driver_path, source, chrome_options = chrome_options):
 
         return(paywall, text)        
     
-    elif source == "Berlingske"
+    elif source == "Berlingske":
         if soup.find(class_ = "paywall"):
             paywall = True
             text = ''
