@@ -2,8 +2,16 @@
 # coding: utf-8
 
 # Packages
-import json
 import os
+import sys
+
+projectdir = os.path.join("project_pol-media-use")
+modulesdir = os.path.join(projectdir, "modules")
+
+sys.path.insert(0, modulesdir)
+
+import textdl
+import json
 import re
 import requests
 from bs4 import BeautifulSoup as bs
@@ -11,9 +19,6 @@ import time
 
 # Selenium
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException, WebDriverException, ElementNotInteractableException
-from selenium.webdriver.common.action_chains import ActionChains
 
 # Chromedriver options
 from selenium.webdriver.chrome.options import Options
@@ -24,160 +29,96 @@ chrome_options.add_argument("--headless")
 
 # Dirs
 driver_path = os.path.join('C:/', 'chromedriver', 'chromedriver.exe')
+#driver_path = os.path.join('/usr/lib/chromium-browser/chromedriver') # ubuntu
 datapath = os.path.join('D:/', 'data',  'dk_news', 'articles_20210406')
-outpath = os.path.join(datapath, 'articles_with-text_20210406.json')
+outpath = os.path.join(datapath)
 
+ber_inname = "berlingske_articles.json"
+ber_outname = "berlingske_articles_with-text.json"
+dr_inname = "dr_articles.json"
+dr_outname = "dr_articles_with-text.json"
+eb_inname = "eb_articles.json"
+eb_outname = "eb_articles_with-text.json"
+jp_inname = "jp_articles.json"
+jp_outname = "jp_articles_with-text.json"
+pol_inname = "politiken_articles.json"
+pol_outname = "politiken_articles_with-text.json"
+tv2_inname = "tv2_articles.json"
+tv2_outname = "tv2_articles_with-text.json"
 
-## Load data
+## Berlingske
 
-datafiles = [os.path.join(datapath,f) for f in os.listdir(datapath) if os.path.isfile(os.path.join(datapath, f))]
-datafiles = [datafile for datafile in datafiles if re.match(r'.*\.json', datafile)]
+with open(os.path.join(datapath, ber_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
 
-data = list()
-
-for datafile in datafiles:
-    with open(datafile, 'r', encoding = 'utf-8') as f:
-        entries = json.load(f)
-        data = data + entries
-
-
-## Functions
-
-def get_arttext_ber(link):
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    if soup.find(class_ = "paywall"):
-        paywall = True
-        text = ''
-    else:
-        paywall = False
-        text = soup.find('div', id = "articleBody").get_text()
-    
-    return(paywall, text)
-
-
-def get_arttext_pol(link):
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    if soup.find(class_ = "stopsign"):
-        paywall = True
-        text = ''
-    else:
-        paywall = False
-        text = soup.find('div', class_ = "article__body").get_text()
-    
-    return(paywall, text)
-
-
-def get_arttext_dr(link):
-    # Undgå "engagement" links
-    
-    if "nyheder/politik/" not in link:
-        return(None, None)
-    
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    paywall = False
-    text = soup.find('div', class_ = "dre-article-body").get_text()
-    
-    return(paywall, text)
-
-
-def get_arttext_eb(link):
-    
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    if soup.find(class_ = re.compile(r'paywall')):
-        paywall = True
-        text = ''
-    else:
-        paywall = False
-        text = soup.find('div', class_ = "article-bodytext").get_text()
-    
-    return(paywall, text)
-
-
-def get_arttext_jp(link):
-    
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    time.sleep(0.5)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    paywall = False
-    text = soup.find('article-body').get_text()
-    
-    return(paywall, text)
-
-
-def get_arttext_tv2(link):
-
-    if "nyheder.tv2" not in link:
-        return(None, None)    
-    
-    driver = webdriver.Chrome(executable_path = driver_path, options=chrome_options)
-
-    driver.get(link)
-    time.sleep(0.5)
-    pageSource = driver.page_source.encode("utf-8")
-    driver.quit()
-
-    soup = bs(pageSource, 'html.parser')
-    
-    paywall = False
-    text = soup.find(attrs = {'data-adobe-context': 'article-body'}).get_text()
-    
-    return(paywall, text)
-
-
-for c, entry in enumerate(data, start = 1):
-    if entry.get('newspaper_name' == 'TV2'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_tv2(entry.get('article_link'))
-    elif entry.get('newspaper_name' == 'Berlingske'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_ber(entry.get('article_link'))
-    elif entry.get('newspaper_name' == 'Politiken'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_pol(entry.get('article_link'))
-    elif entry.get('newspaper_name' == 'DR'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_dr(entry.get('article_link'))    
-    elif entry.get('newspaper_name' == 'EB'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_eb(entry.get('article_link'))  
-    elif entry.get('newspaper_name' == 'JP'):
-        entry['article_paywall'], entry['article_text'] = get_arttext_jp(entry.get('article_link'))  
-    
-    progress = "|{0}| {1:.2f} %".format(("="*int(c/len(data) * 50)).ljust(50), c/len(data) * 100)
-    print(progress, end = "\r")
-    
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "Berlingske", chrome_options = chrome_options))
     time.sleep(0.5)
 
-
-with open(outpath, 'w', encoding = 'utf-8') as f:
+with open(os.path.join(outpath, ber_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
 
+    
+## DR
+
+with open(os.path.join(datapath, dr_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
+
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "DR", chrome_options = chrome_options))
+    time.sleep(0.5)
+
+with open(os.path.join(outpath, dr_outname), 'w', encoding = 'utf-8') as f:
+    json.dump(data, f)
+
+    
+## EB
+
+with open(os.path.join(datapath, eb_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
+
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "EB", chrome_options = chrome_options))
+    time.sleep(0.5)
+
+with open(os.path.join(outpath, eb_outname), 'w', encoding = 'utf-8') as f:
+    json.dump(data, f)
+
+    
+## JP
+
+with open(os.path.join(datapath, jp_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
+
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "JP", chrome_options = chrome_options))
+    time.sleep(0.5)
+
+with open(os.path.join(outpath, jp_outname), 'w', encoding = 'utf-8') as f:
+    json.dump(data, f)
+
+    
+## Politiken
+
+with open(os.path.join(datapath, pol_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
+
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "Politiken", chrome_options = chrome_options))
+    time.sleep(0.5)
+
+with open(os.path.join(outpath, pol_outname), 'w', encoding = 'utf-8') as f:
+    json.dump(data, f)
+
+    
+## TV2
+
+with open(os.path.join(datapath, tv2_inname), 'r', encoding = 'utf-8') as f:
+    data = json.load(f)
+
+for entry in data:
+    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = "TV2", chrome_options = chrome_options))
+    time.sleep(0.5)
+
+with open(os.path.join(outpath, tv2_outname), 'w', encoding = 'utf-8') as f:
+    json.dump(data, f)
