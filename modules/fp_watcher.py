@@ -6,6 +6,8 @@ from urllib.parse import urljoin
 import os
 from datetime import datetime
 
+import textdl
+
 import re
 import time
 import uuid
@@ -14,6 +16,20 @@ from random import randint
 from itertools import compress
 import json
 import logging
+
+# Selenium
+from selenium import webdriver
+
+# Chromedriver options
+from selenium.webdriver.chrome.options import Options
+chrome_options = Options()
+chrome_options.add_argument("--disable-extensions")
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--headless")
+
+# Dirs
+#driver_path = os.path.join('C:/', 'chromedriver', 'chromedriver.exe')
+driver_path = os.path.join('/usr/lib/chromium-browser/chromedriver') # ubuntu
 
 logger = logging.getLogger(__name__)
 
@@ -515,6 +531,14 @@ def get_article_info(link, keywords, source, source_url, get_source = False):
             info['article_title'] = article_title
             info['article_link'] = link
             info['article_datetime'] = article_datetime
+            
+            try:
+                info['article_paywall'], info['article_text'] = = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = source, 
+                                                                                               chrome_options = chrome_options))
+            except:
+                info['article_paywall'] = None
+                info['article_text'] = None
+                
             info['encounter_datetime'] = encounter_time
             info['mp_match'] = len(mp_matches) > 0
             info['mp_matches'] = mp_matches
@@ -522,6 +546,7 @@ def get_article_info(link, keywords, source, source_url, get_source = False):
                 info['article_source'] = str(bs(req.content, "html.parser"))
             else:
                 info['article_source'] = ''
+                
             return(info)
         else:
             i = i -1
@@ -539,10 +564,13 @@ def get_article_info(link, keywords, source, source_url, get_source = False):
             info['article_title'] = ''
             info['article_link'] = link
             info['article_datetime'] = ''
+            info['article_paywall'] = None
+            info['article_text'] = None
             info['encounter_datetime'] = encounter_time
             info['mp_match'] = False
             info['mp_matches'] = []
             info['article_source'] = ''
+            
             return(info)
 
 def front_page_check(source, keywords, url_list, get_source = False):
