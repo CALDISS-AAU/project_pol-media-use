@@ -33,32 +33,42 @@ def fix_dicts(string):
 
 def unnest_hashtags(hashtags):
     if isinstance(hashtags, list):
-        hashtags_list = [hashtag['text'] for hashtag in hashtags if 'text' in hashtag]
+        hashtags_list = [hashtag.get('text') for hashtag in hashtags]
         return(hashtags_list)
     else:
         return
 
-def process_df(df, keep_cols = keep_cols):
+def process_df(df, keep_cols = 'all', user_infos = 'all'):
+    df = df.dropna(subset = ['user'])
     df = df.reset_index()
     df['is_retweet'] = df['retweeted_status'].notna()
     df['entities'] = df['entities'].apply(fix_dicts)
     df['user'] = df['user'].apply(fix_dicts)
     df = pd.concat([df, pd.json_normalize(df['entities'], max_level = 1)], axis = 1)
 
+    if user_infos == 'all':
+        user_infos = list(df.loc[0, 'user'].keys())
+
     for user_info in user_infos:
         colname = "user_" + user_info
         try:
-            df[colname] = df['user'].apply(lambda x: x[user_info])
+            df[colname] = df['user'].apply(lambda x: x.get(user_info))
         except TypeError:
             df[colname] = np.nan
 
     df['hashtags'] = df['hashtags'].apply(unnest_hashtags)  
     
-    df = df.loc[:, keep_cols]
-    
-    return(df)
+    if keep_cols == 'all':
+        return(df)
+        
+    else:
+        df = df.loc[:, keep_cols]
+        return(df)
 
-def chunk_data(path, chunksize = 10000, cols = import_cols):
+def chunk_data(path, chunksize = 10000, cols = 'all'):
+    if cols == 'all':
+        import_cols = None
+        
     for chunk in pd.read_csv(path, chunksize = chunksize, usecols = import_cols):
         yield chunk
 
