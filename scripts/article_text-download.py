@@ -28,9 +28,10 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--headless")
 
 # Dirs
-driver_path = os.path.join('C:/', 'chromedriver', 'chromedriver.exe')
-#driver_path = os.path.join('/usr/lib/chromium-browser/chromedriver') # ubuntu
-datapath = os.path.join('D:/', 'data',  'dk_news', 'articles_20210406')
+#driver_path = os.path.join('C:/', 'chromedriver', 'chromedriver.exe')
+driver_path = os.path.join('/usr/lib/chromium-browser/chromedriver') # ubuntu
+#datapath = os.path.join('D:/', 'data',  'dk_news', 'articles_20210406')
+datapath = os.path.join('/home', 'ubuntu', 'data', 'dk-news', 'articles_20210421')
 outpath = os.path.join(datapath)
 
 ber_inname = "berlingske_articles.json"
@@ -52,8 +53,11 @@ with open(os.path.join(datapath, ber_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Berlingske", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Berlingske", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, ber_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
@@ -65,8 +69,11 @@ with open(os.path.join(datapath, dr_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "DR", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "DR", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, dr_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
@@ -78,8 +85,11 @@ with open(os.path.join(datapath, eb_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "EB", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "EB", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, eb_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
@@ -91,8 +101,11 @@ with open(os.path.join(datapath, jp_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "JP", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "JP", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, jp_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
@@ -104,8 +117,11 @@ with open(os.path.join(datapath, pol_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Politiken", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "Politiken", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, pol_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)
@@ -117,8 +133,11 @@ with open(os.path.join(datapath, tv2_inname), 'r', encoding = 'utf-8') as f:
     data = json.load(f)
 
 for entry in data:
-    entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "TV2", chrome_options = chrome_options)
-    time.sleep(0.5)
+    try:
+        entry['article_paywall'], entry['article_text'] = textdl.get_arttext(entry.get('article_link'), driver_path = driver_path, source = "TV2", chrome_options = chrome_options)
+        time.sleep(0.5)
+    except:
+        continue
 
 with open(os.path.join(outpath, tv2_outname), 'w', encoding = 'utf-8') as f:
     json.dump(data, f)

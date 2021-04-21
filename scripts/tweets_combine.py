@@ -5,9 +5,16 @@ from os import listdir
 from os.path import isfile, join
 import multiprocessing as mp
 
-datapath = os.path.join('C:/', 'data', 'poltweets', 'tweets')
+#datadir = os.path.join('C:/', 'data', 'poltweets')
+datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets')
+datapath = os.path.join(datadir, 'tweets')
 datafiles = [join(datapath,f) for f in listdir(datapath) if isfile(join(datapath, f))]
 datafiles = [datafile for datafile in datafiles if datafile.endswith('.ndjson')]
+
+# Parameters
+poolsize = 8
+outdir = os.path.join(datadir, 'poltweets_combined_20210421.gz')
+
 
 def read_datafiles(datafiles):
     records_all = list()
@@ -17,11 +24,11 @@ def read_datafiles(datafiles):
     df = pd.DataFrame.from_records(records_all)
     return(df)
 
-def split_job(datafiles):
+def split_job(datafiles, poolsize = 4):
     combined_df = pd.DataFrame()
     folds = []
-    pool = mp.Pool(4)
-    split = 4
+    pool = mp.Pool(poolsize)
+    split = poolsize
     length = int(len(datafiles)/split) #length of each fold
     for i in range(split-1):
         folds.append(datafiles[i*length:(i+1)*length])
@@ -37,10 +44,10 @@ def split_job(datafiles):
 
     return(combined_df)
 
-def run_and_save():
-    tweets_df = split_job(datafiles)
-    savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200127.gz")
+def run_and_save(poolsize = 4):
+    tweets_df = split_job(datafiles, poolsize = poolsize)
+    savepath = outdir
     tweets_df.to_csv(savepath, compression='gzip')
 
 if __name__ == '__main__':
-    run_and_save()
+    run_and_save(poolsize = poolsize)
