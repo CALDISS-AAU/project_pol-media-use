@@ -7,13 +7,21 @@ import multiprocessing as mp
 import ast
 import numpy as np
 
+# Parameters
+poolsize = 8
+datadir = os.path.join('D:/', 'data', 'poltweets')
+datafile = "tweets_combined_20200127.gz"
+savefile = "tweets_flattened_20200127.gz"
+
+datapath = os.path.join(datadir, datafile)
+savepath = os.path.join(datadir, savefile)
+
 import_cols = ['created_at', 'id', 'full_text', 'entities', 'user', 'retweeted_status', 'is_quote_status', 'retweet_count', 
             'favorite_count', 'favorited', 'retweeted']
 user_infos = ['id', 'name', 'screen_name', 'location', 'description', 'url', 'followers_count', 'created_at', 'verified']
 keep_cols = ['created_at', 'id', 'full_text', 'is_quote_status', 'retweet_count', 'favorite_count', 'favorited', 'retweeted',
             'is_retweet', 'hashtags', 'user_mentions', 'urls'] + ["user_" + user_info for user_info in user_infos]
-datapath = os.path.join('C:/', 'data', 'poltweets', "tweets_combined_20200127.gz")
-savepath = os.path.join('C:/', 'data', 'poltweets', "tweets_flattened_20200127.gz")
+
 
 def fix_dicts(string):
     if not isinstance(string, dict):
@@ -53,9 +61,9 @@ def chunk_data(path, chunksize = 10000, cols = import_cols):
     for chunk in pd.read_csv(path, chunksize = chunksize, usecols = import_cols):
         yield chunk
 
-def iter_process(datapath):
+def iter_process(datapath, poolsize = 4):
     processed_df = pd.DataFrame()
-    pool = mp.Pool(4)
+    pool = mp.Pool(poolsize)
     
     chunked_data = chunk_data(datapath)
     
@@ -69,12 +77,12 @@ def iter_process(datapath):
     
     return(processed_df)
 
-def run_and_save():
-    processed_df = iter_process(datapath)
+def run_and_save(poolsize = 4):
+    processed_df = iter_process(datapath, poolsize = poolsize)
     processed_df.to_csv(savepath, compression='gzip')
 
 if __name__ == '__main__':
-    run_and_save()
+    run_and_save(poolsize)
 
 
     
