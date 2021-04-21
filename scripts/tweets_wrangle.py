@@ -9,9 +9,10 @@ import numpy as np
 
 # Parameters
 poolsize = 8
-datadir = os.path.join('D:/', 'data', 'poltweets')
-datafile = "tweets_combined_20200127.gz"
-savefile = "tweets_flattened_20200127.gz"
+#datadir = os.path.join('D:/', 'data', 'poltweets')
+datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets')
+datafile = "poltweets_combined_20210421.gz"
+savefile = "poltweets_flattened_20210421.gz"
 
 datapath = os.path.join(datadir, datafile)
 savepath = os.path.join(datadir, savefile)
