@@ -9,3 +9,5 @@ data/data/
 data/testing
 */__pycache__/*
 */.log
+*/logs
+logs/
