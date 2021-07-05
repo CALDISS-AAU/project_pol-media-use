@@ -14,8 +14,8 @@ import datetime
 poolsize = 8
 #datadir = os.path.join('D:/', 'data', 'poltweets')
 datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets', 'latest_data')
-datafiles = [join(datadir,f) for f in listdir(datadir) if isfile(join(datadir, f))]
-datafile = [datafile for datafile in datafiles if (datafile.startswith('poltweets_combined') & datafile.endswith('.gz'))][0]
+datafile = [datafile for datafile in listdir(datadir) if (datafile.startswith('poltweets_combined') & datafile.endsw
+ith('.gz'))][0]
 outname = f'poltweets_flattened_{datetime.datetime.now().date()}.gz'
 
 datapath = os.path.join(datadir, datafile)
