@@ -6,6 +6,8 @@ conda activate mlbase
 
 cd ~/data/poltweets/
 
+rm tweets_old/*
+
 mv tweets/* tweets_old
 
 mv latest_data/*.gz old_data/
