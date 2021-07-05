@@ -2,6 +2,8 @@
 
 source /home/ubuntu/anaconda3/etc/profile.d/conda.sh
 
+conda activate mlbase
+
 cd ~/data/poltweets/
 
 mv tweets/* tweets_old
