@@ -14,6 +14,8 @@ mv latest_data/*.gz old_data/
 
 unzip poltweets_$(date +%F).zip -d tweets/
 
-python project_pol-media-use/scripts/tweets_combine.py
+cd ~
 
-python project_pol-media-use/scripts/tweets_wrangle.py
+python ~/project_pol-media-use/scripts/tweets_combine.py
+
+python ~/project_pol-media-use/scripts/tweets_wrangle.py
