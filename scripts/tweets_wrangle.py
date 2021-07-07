@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pandas as pd
 import json
 import os
@@ -6,16 +8,17 @@ from os.path import isfile, join
 import multiprocessing as mp
 import ast
 import numpy as np
+import datetime
 
 # Parameters
 poolsize = 8
 #datadir = os.path.join('D:/', 'data', 'poltweets')
-datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets')
-datafile = "poltweets_combined_20210421.gz"
-savefile = "poltweets_flattened_20210421.gz"
+datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets', 'latest_data')
+datafile = [datafile for datafile in listdir(datadir) if (datafile.startswith('poltweets_combined') & datafile.endswith('.gz'))][0]
+outname = f'poltweets_flattened_{datetime.datetime.now().date()}.gz'
 
 datapath = os.path.join(datadir, datafile)
-savepath = os.path.join(datadir, savefile)
+savepath = os.path.join(datadir, outname)
 
 import_cols = ['created_at', 'id', 'full_text', 'entities', 'user', 'retweeted_status', 'is_quote_status', 'retweet_count', 
             'favorite_count', 'favorited', 'retweeted']
