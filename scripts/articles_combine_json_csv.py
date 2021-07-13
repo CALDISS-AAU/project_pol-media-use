@@ -81,7 +81,7 @@ else:
 
 
 # Exclude source
-for entry in article_all:
+for entry in articles_all:
     if 'article_source' in entry:
         entry.pop('article_source')
 
