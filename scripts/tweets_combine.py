@@ -1,19 +1,24 @@
+#!/usr/bin/env python
+
 import pandas as pd
 import json
 import os
 from os import listdir
 from os.path import isfile, join
 import multiprocessing as mp
+import datetime
 
 #datadir = os.path.join('C:/', 'data', 'poltweets')
 datadir = os.path.join('/home', 'ubuntu', 'data', 'poltweets')
+outdir = os.path.join('/home', 'ubuntu', 'data', 'poltweets', 'latest_data')
 datapath = os.path.join(datadir, 'tweets')
 datafiles = [join(datapath,f) for f in listdir(datapath) if isfile(join(datapath, f))]
 datafiles = [datafile for datafile in datafiles if datafile.endswith('.ndjson')]
 
 # Parameters
 poolsize = 8
-outdir = os.path.join(datadir, 'poltweets_combined_20210421.gz')
+outname = f'poltweets_combined_{datetime.datetime.now().date()}.gz'
+outpath = os.path.join(outdir, outname)
 
 
 def read_datafiles(datafiles):
@@ -46,7 +51,7 @@ def split_job(datafiles, poolsize = 4):
 
 def run_and_save(poolsize = 4):
     tweets_df = split_job(datafiles, poolsize = poolsize)
-    savepath = outdir
+    savepath = outpath
     tweets_df.to_csv(savepath, compression='gzip')
 
 if __name__ == '__main__':
