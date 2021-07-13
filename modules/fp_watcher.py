@@ -6,6 +6,12 @@ from urllib.parse import urljoin
 import os
 from datetime import datetime
 
+import sys
+projectdir = os.path.join('/home', 'ubuntu', 'project_pol-media-use')
+modulesdir = os.path.join(projectdir, 'modules')
+
+sys.path.insert(0, modulesdir)
+
 import textdl
 from mp_checker import mp_check
 
@@ -269,7 +275,7 @@ def get_article_info(link, keywords, source, source_url, get_source = False):
             if info['article_text'] is not None:
                 mp_matches = mp_check(info['article_text'])
             else:
-                mp_matches = 0
+                mp_matches = []
             
             info['mp_match'] = len(mp_matches) > 0
             info['mp_matches'] = mp_matches
