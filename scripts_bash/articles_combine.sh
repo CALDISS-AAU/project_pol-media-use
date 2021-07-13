@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Run scripts to combine?
-## Both a combined json and a zipped csv
-## Filter based on latest article_accessed date in new data and combine
-
 source /home/ubuntu/anaconda3/etc/profile.d/conda.sh
 
 conda activate mlbase
@@ -20,4 +16,4 @@ unzip polarticles_$(date +%F).zip -d articles/
 
 cd ~
 
-# Scripts
+python ~/project_pol-media-use/scripts/articles_combine_json_csv.py
