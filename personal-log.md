@@ -18,3 +18,8 @@
   - Bash job to update data using zipped file of latest articles and `articles_combine_json_csv.py`
 - Set up crontab to run `articles_zip-copy.sh` and `articles_combine.sh` every Thursday at 3 AM  and 4 AM respectively
 
+
+
+#### 2021-08-09
+
+- Added @kronborgsusan to list of Twitter handles to extract
