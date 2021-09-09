@@ -23,6 +23,7 @@
 #### 2021-08-09
 
 - Added @kronborgsusan to list of Twitter handles to extract
+- Added "Susan Kronborg" to news collection
 
 
 
@@ -31,7 +32,6 @@
 - Added the following Twitter handles to extract:
   - @rvthorholm (Christina Thorholm)
 - Added the following names to news collection:
-  - Susan Kronborg
   - Christina Thorholm
   - Anne Rasmussen
 - Removed the following Twitter handles from extraction:
