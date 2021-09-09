@@ -40,7 +40,7 @@
   - @aahlers (Tommy Ahlers) 
   - @KHegaard (Kristian Hegaard)
 - Removed the following names from news collection:
-  - Kristian_Jensen 
+  - Kristian Jensen 
   - Morten Østergaard
   - Tommy Ahlers
   - Kristian Hegaard
