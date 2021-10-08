@@ -51,7 +51,7 @@ PARAMS = {"DR": {"url": "https://www.dr.dk/nyheder/politik/",
                          "heading_class_regex": "teaser__title-link"},
           "TV2": {"url": "https://nyheder.tv2.dk/politik/",
                   "heading_tag": "a",
-                  "heading_class_regex": "o-teaser_link"},
+                  "heading_class_regex": "tc_teaser__link"},
           "EB": {"url": "https://ekstrabladet.dk/nyheder/politik/",
                  "heading_tag": "a",
                  "heading_class_regex": "card"},
@@ -129,13 +129,11 @@ def get_links_ber(headlines):
 def get_links_tv2(pagesoup, page_params, keywords = [r".*"]):
     
     # extract relevant sections soups
-    section_soups = pagesoup.find_all('section', class_ = "g-gutter")
+    section_soups = pagesoup.find_all('section', class_ = "tc_deck tc_deck--col3center")
     div_soups = []
-    for section_soup in section_soups[0:2]:
-        div_soup = section_soup.find('div')
-        div_soups.append(div_soup)
-
-    div_soups.append(section_soups[2])
+    for section_soup in section_soups:
+        div_soups_sec = section_soup.find_all('div')
+        div_soups = div_soups + div_soups_sec
 
     #get headline soups
     headlines = []
