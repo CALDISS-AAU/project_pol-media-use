@@ -45,3 +45,8 @@
   - Tommy Ahlers
   - Kristian Hegaard
 
+
+
+#### 2021-10-08
+
+- Patching fp_watcher to match changes to https://nyheder.tv2.dk/politik 
