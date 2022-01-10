@@ -50,3 +50,10 @@
 #### 2021-10-08
 
 - Patching fp_watcher to match changes to https://nyheder.tv2.dk/politik 
+
+
+
+#### 2022-01-10
+
+- Adding "Gitte Willumsen" from news collection (`modules/mp_checker.py`)
+- Removing "Inger Støjberg" from news collection (`modules/mp_checker.py`)
