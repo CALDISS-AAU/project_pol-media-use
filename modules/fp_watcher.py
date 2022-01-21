@@ -262,8 +262,8 @@ def get_article_info(link, keywords, source, source_url, get_source = False):
             info['article_datetime'] = article_datetime
             
             try:
-                info['article_paywall'], info['article_text'] = textdl.get_arttext(entry.get('article_link', driver_path = driver_path, source = source, 
-                                                                                               chrome_options = chrome_options))
+                info['article_paywall'], info['article_text'] = textdl.get_arttext(info.get('article_link'), driver_path = driver_path, source = source, 
+                                                                                               chrome_options = chrome_options)
             except:
                 info['article_paywall'] = None
                 info['article_text'] = None
