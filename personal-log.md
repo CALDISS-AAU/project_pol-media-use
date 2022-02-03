@@ -55,5 +55,14 @@
 
 #### 2022-01-10
 
-- Adding "Gitte Willumsen" from news collection (`modules/mp_checker.py`)
+- Adding "Gitte Willumsen" to news collection (`modules/mp_checker.py`)
 - Removing "Inger Støjberg" from news collection (`modules/mp_checker.py`)
+
+
+
+#### 2022-02-03
+
+- Removing "Karsten Lauritzen" from news collection (`modules/mp_checker.py`)
+- Removing "Karsten Lauritzen" from tweet collection
+- Adding "Maja Torp" to news collection (`modules/mp_checker.py`)
+- Adding "Maja Torp" (@MajaTorpAalborg) to tweet collection
