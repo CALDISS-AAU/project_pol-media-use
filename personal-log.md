@@ -66,3 +66,23 @@
 - Removing "Karsten Lauritzen" from tweet collection
 - Adding "Maja Torp" to news collection (`modules/mp_checker.py`)
 - Adding "Maja Torp" (@MajaTorpAalborg) to tweet collection
+
+
+
+#### 2022-02-16
+
+- Downloading missing texts on UCloud using `textdl_20220216.py` (in kgk directory)
+  - Using combined set from 2022-02-10
+  - Simple download: try with current functions, skip if any errors
+  - Set with texts: `articles_combined_2022-02-10_with-texts_20220217.json`
+- Encountered changes in URLs for Berlingske - *need manual revision*
+- Encountered errors in `mp_matches` - possibly matching other articles on news site - *needs revision*
+
+
+
+#### 2022-02-23
+
+- Updating combined set on worker with updated set with texts: `articles_combined_2022-02-23.json`
+- 3675 missing texts
+- 17870 with text
+- Next merge on 2022-02-24 will combine new articles with set with downloaded texts
