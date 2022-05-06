@@ -86,3 +86,13 @@
 - 3675 missing texts
 - 17870 with text
 - Next merge on 2022-02-24 will combine new articles with set with downloaded texts
+
+
+
+#### 2022-05-06
+
+- Adding "Maria Gudme" (@mariagudme) to tweet and news collection
+- Removing "Nick Hækkerup" from news collection (does not have a twitter profile - never part of tweet collection)
+- Updating `polhandles.txt` in repository
+  - Converting to lower-case
+- Updating cronjob to get polhandles from repository
