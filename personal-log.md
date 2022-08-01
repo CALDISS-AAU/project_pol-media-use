@@ -96,3 +96,10 @@
 - Updating `polhandles.txt` in repository
   - Converting to lower-case
 - Updating cronjob to get polhandles from repository
+
+
+
+#### 2022-08-01
+
+- Adding "Susanne Eilersen" (@Eilersen_DF) to tweet and news collection
+- Removing "Kristian Thulesen Dahl" (@Kristianthdahl) from tweet and news collection
