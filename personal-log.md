@@ -103,3 +103,12 @@
 
 - Adding "Susanne Eilersen" (@Eilersen_DF) to tweet and news collection
 - Removing "Kristian Thulesen Dahl" (@Kristianthdahl) from tweet and news collection
+
+
+
+#### 2022-12-12
+
+- Ending data collection (news and twitter)
+
+
+
