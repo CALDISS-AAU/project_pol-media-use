@@ -117,4 +117,6 @@
 - Trying to retrieve missing texts using `textdl_20221212.py` (under kgk directory)
 
 
+#### 2022-12-22
 
+- Downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles
