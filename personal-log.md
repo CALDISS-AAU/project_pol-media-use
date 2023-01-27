@@ -120,3 +120,9 @@
 #### 2022-12-22
 
 - Downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles
+- Downloaded 1974/35873
+- Reason for downloading stopped unknown - no links added to list of failed URLs
+
+#### 2023-01-27
+
+- Continue downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles 

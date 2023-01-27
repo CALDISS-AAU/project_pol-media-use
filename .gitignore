@@ -11,3 +11,4 @@ data/testing
 */.log
 */logs
 logs/
+*sparkmonitor*
