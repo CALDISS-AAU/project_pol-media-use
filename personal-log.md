@@ -126,3 +126,13 @@
 #### 2023-01-27
 
 - Continue downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles 
+- Starting script on descriptives
+
+#### 2023-02-14
+
+- Continue downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles 
+- Resolved issue caused by UnicodeDecodeError for some links
+- Created articles subset (`scripts/articles_subset.py`): `articles_subset_2023-02-14.json`
+  - Date filter (after 2020-09-01)
+  - Filter links from irrelevant subsections
+  - Add filename for raw html
