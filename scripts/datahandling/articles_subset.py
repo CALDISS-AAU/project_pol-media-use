@@ -191,6 +191,10 @@ art_df.loc[art_df['newspaper_name'] == 'Politiken', 'filename'] = art_df.loc[art
 art_df.loc[art_df['newspaper_name'] == 'TV2', 'filename'] = art_df.loc[art_df['newspaper_name'] == 'TV2', 'article_link'].apply(lambda url: re.sub(filename_regex, 'TV2', url).replace('/', '_') + '.html')
 
 
+## Correct long filenames
+
+art_df.loc[art_df['filename'].str.len() > 255, 'filename'] = art_df.loc[art_df['filename'].str.len() > 255, 'filename'].apply(lambda x: x[0:200] + x[len(x)-5:len(x)])
+
 # Save
 out_n = 'articles_subset_2023-02-14.json'
 out_p = join(data_path, out_n)

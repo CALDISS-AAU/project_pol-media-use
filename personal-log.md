@@ -142,3 +142,9 @@
 
 - Continue downloading raw html files using `articledl_missingfiles_20230220.py` in kgk directory - files stored in data/articles
 - Missing files based on article filenames in `articles_subset_2023-02-14.json`
+
+
+#### 2023-02-21
+
+- 2 files were not downloaded due to long filenames. Filenames corrected in `articles_subset_2023-02-14.json` (`scripts/articles_subset.py`) to be less than 255 characters.
+- All raw html files downloaded.
