@@ -132,7 +132,7 @@
 
 - Continue downloading raw html files using `articledl_20221222.py` in kgk directory - files stored in data/articles 
 - Resolved issue caused by UnicodeDecodeError for some links
-- Created articles subset (`scripts/articles_subset.py`): `articles_subset_2023-02-14.json`
+- Created articles subset (`scripts/datahandling/articles_subset.py`): `articles_subset_2023-02-14.json`
   - Date filter (after 2020-09-01)
   - Filter links from irrelevant subsections
   - Add filename for raw html
@@ -148,3 +148,11 @@
 
 - 2 files were not downloaded due to long filenames. Filenames corrected in `articles_subset_2023-02-14.json` (`scripts/articles_subset.py`) to be less than 255 characters.
 - All raw html files downloaded.
+
+
+#### 2023-03-02
+
+- Additions to `scripts/datahandling/articles_subset.py`:
+  - Uses `articles_combined_2022-12-08_textdl_20221213.json` as raw data (latest collection with text dl from 2022-12-13)
+  - Retrieve missing text from raw HTML, if text is missing and there is no paywall
+  - Write out data changes (number of articles) to `docs/articles_subset_reportinput.txt`

@@ -5,6 +5,7 @@
 import json
 import os
 from os.path import join
+import sys
 import re
 import time
 import pandas as pd
@@ -13,16 +14,27 @@ import urllib
 from urllib.parse import urlparse
 from datetime import datetime
 
-# Dirs
-data_path = os.path.join('/work', 'polmeduse', 'data', 'dk_news')
-articles_path = os.path.join(data_path, 'articles')
+# Project dir
+project_path = join('/work', 'polmeduse', 'kgk', 'repo', 'project_pol-media-use')
 
-if not os.path.isdir(articles_path):
-    os.mkdir(articles_path)
+## Custom modules
+modules_p = join(project_path, 'modules')
+sys.path.append(modules_p)
+from textfromraw import get_arttextfromraw as GET_TEXT
+
+# Dirs
+data_path = join('/work', 'polmeduse', 'data', 'dk_news')
+articles_path = join(data_path, 'articles')
+docs_path = join(project_path, 'docs')
+
+# Document for data changes
+doc_n = 'articles_subset_reportinput.txt'
+doc_fc = open(join(docs_path, doc_n), 'w', encoding = 'utf-8')
 
 # Datafiles
-rawdata_n = 'articles_combined_2022-12-08.json'
-rawdata_p = os.path.join(data_path, rawdata_n)
+rawdata_n = 'articles_combined_2022-12-08_textdl_20221213.json'
+rawdata_p = join(data_path, rawdata_n)
+
 
 # Load data
 with open(rawdata_p, 'r', encoding = 'utf-8') as f:
@@ -30,11 +42,17 @@ with open(rawdata_p, 'r', encoding = 'utf-8') as f:
 
 # Convert to pandas
 art_df = pd.DataFrame.from_records(rawdata)
-print(art_df.shape) # initial
+
+## Doc input
+doc_input = f'Raw data contains {str(art_df.shape[0])} articles.'
+doc_fc.write(doc_input + '\n')
 
 # Remove duplicates
 art_df = art_df.drop_duplicates(subset = ['article_link'])
-print(art_df.shape) # after removing duplicates
+
+## Doc input
+doc_input = f'After removing duplicates based on article link, data contains {str(art_df.shape[0])} articles.'
+doc_fc.write(doc_input + '\n')
 
 # Filter irrelevant URLs
 urls = list(art_df['article_link'])
@@ -165,15 +183,21 @@ def is_relevant(url):
         return True 
 
 art_df = art_df.loc[art_df['article_link'].apply(is_relevant), :] # use function above to filter articles based on URL
-print(art_df.shape) # after removing irrelevant links
+
+## Doc input
+doc_input = f'After removing irrelevant articles based on URL paths, data contains {str(art_df.shape[0])} articles.'
+doc_fc.write(doc_input + '\n')
 
 
 # Handle datetime
 art_df['article_datetime'] = pd.to_datetime(art_df['article_datetime'], utc = True).dt.tz_localize(None)
 
 ## Sort articles from before collection start
-art_df = art_df.loc[art_df['article_datetime'] > '2020-09-01', :]
-print(art_df.shape) # after date filter
+art_df = art_df.loc[art_df['article_datetime'] >= '2020-09-01', :]
+
+## Doc input
+doc_input = f'After filtering to include articles from start of collection (2020-09-01), data contains {str(art_df.shape[0])} articles.'
+doc_fc.write(doc_input + '\n')
 
 
 # Add filename
@@ -192,8 +216,62 @@ art_df.loc[art_df['newspaper_name'] == 'TV2', 'filename'] = art_df.loc[art_df['n
 
 
 ## Correct long filenames
-
 art_df.loc[art_df['filename'].str.len() > 255, 'filename'] = art_df.loc[art_df['filename'].str.len() > 255, 'filename'].apply(lambda x: x[0:200] + x[len(x)-5:len(x)])
+
+
+# Convert to JSON records
+art_df.loc[art_df['article_text'].isna(), 'article_text'] = ''
+
+art_records = art_df.to_dict(orient = 'records')
+
+
+# Add missing text
+for article in art_records:
+
+    newspaper = article.get('newspaper_name')
+    filename = article.get('filename')
+    paywall = article.get('article_paywall')
+    arttext_len = len(article.get('article_text'))
+
+    if arttext_len == 0 and paywall != True:
+
+        article_fp = join(articles_path, filename)
+
+        with open(article_fp, 'r') as f:
+            article_source = f.read()
+
+        try:
+            article_text = GET_TEXT(article_source, newspaper)
+            article['article_text'] = article_text
+
+        except AttributeError:
+            continue
+
+
+# Convert back to df
+art_df = pd.DataFrame.from_records(art_records)
+
+# Metrics
+n_withtext = sum(list(art_df['article_text'].apply(lambda x: len(x) > 0)))
+n_withpaywall = art_df['article_paywall'].sum()
+columns_string = '\n'.join(list(art_df.columns))
+
+## Doc input
+doc_input = f'Article text has been retrieved for {n_withtext} articles, corresponding to {((n_withtext/art_df.shape[0])*100):.2f}% of articles.'
+doc_fc.write(doc_input + '\n')
+
+doc_input = f'Data contains {str(n_withpaywall)} articles with paywall for which text has not been retrieved.'
+doc_fc.write(doc_input + '\n')
+
+doc_input = f'Data contains {str(art_df.shape[0] - n_withtext - n_withpaywall)} articles for which text was not retrieved for other reasons (articles that no longer exists, live blog pages, articles with non-standard formatting).'
+doc_fc.write(doc_input + '\n')
+
+doc_input = f'Data contains the following columns: {columns_string}'
+doc_fc.write(doc_input + '\n')
+
+
+# Close doc
+doc_fc.close()
 
 # Save
 out_n = 'articles_subset_2023-02-14.json'

@@ -1,0 +1,22 @@
+Raw data contains 35974 articles.
+After removing duplicates based on article link, data contains 35873 articles.
+After removing irrelevant articles based on URL paths, data contains 33200 articles.
+After filtering to include articles from start of collection (2020-09-01), data contains 33119 articles.
+Article text has been retrieved for 26449 articles, corresponding to 79.86% of articles.
+Data contains 6596 articles with paywall for which text has not been retrieved.
+Data contains 74 articles for which text was not retrieved for other reasons (articles that no longer exists, live blog pages, articles with non-standard formatting).
+Data contains the following columns: uuid
+article_accessed
+newspaper_name
+newspaper_frontpage_url
+keywords_search
+keywords_match
+article_title
+article_link
+article_datetime
+encounter_datetime
+article_paywall
+article_text
+mp_matches
+mp_match
+filename
