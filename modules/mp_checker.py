@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 from itertools import compress
 
 MPS = {'Aki-Matilda Høegh-Dam': 'Aki-Matilda Høegh-Dam',
