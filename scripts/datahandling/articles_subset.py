@@ -21,6 +21,7 @@ project_path = join('/work', 'polmeduse', 'kgk', 'repo', 'project_pol-media-use'
 modules_p = join(project_path, 'modules')
 sys.path.append(modules_p)
 from textfromraw import get_arttextfromraw as GET_TEXT
+from mp_checker2 import mp_check2
 
 # Dirs
 data_path = join('/work', 'polmeduse', 'data', 'dk_news')
@@ -190,13 +191,25 @@ doc_fc.write(doc_input + '\n')
 
 
 # Handle datetime
-art_df['article_datetime'] = pd.to_datetime(art_df['article_datetime'], utc = True).dt.tz_localize(None)
+## Extract date from datetime
+date_f_re = re.compile(r'(^\d{4}-\d{2}-\d{2})')
+art_df['article_date'] = art_df['article_datetime'].str.extract(date_f_re)
 
 ## Sort articles from before collection start
-art_df = art_df.loc[art_df['article_datetime'] >= '2020-09-01', :]
+art_df = art_df.loc[pd.to_datetime(art_df['article_date']) >= '2020-09-01', :]
+
+## Rename column
+art_df = art_df.rename(columns = {'article_datetime': 'article_datetime_raw'})
+
 
 ## Doc input
 doc_input = f'After filtering to include articles from start of collection (2020-09-01), data contains {str(art_df.shape[0])} articles.'
+doc_fc.write(doc_input + '\n')
+
+first_date = pd.to_datetime(art_df['article_date']).min()
+last_date = pd.to_datetime(art_df['article_date']).max()
+
+doc_input = f'Data contains articles from {str(first_date)} to {str(last_date)}.'
 doc_fc.write(doc_input + '\n')
 
 
@@ -248,12 +261,30 @@ for article in art_records:
             continue
 
 
+# Check for mps
+for article in art_records:
+
+    mp_matches = mp_check2(article.get('article_text'), article.get('article_date'))
+    
+    if len(mp_matches) > 0:
+        mp_match = 1
+    else:
+        mp_match = 0
+    
+    article['mp_matches'] = mp_matches
+    article['mp_match'] = mp_match
+
+
 # Convert back to df
 art_df = pd.DataFrame.from_records(art_records)
+
+## Filter columns
+art_df = art_df.drop(columns = ['keywords_search', 'keywords_match'])
 
 # Metrics
 n_withtext = sum(list(art_df['article_text'].apply(lambda x: len(x) > 0)))
 n_withpaywall = art_df['article_paywall'].sum()
+n_withmps = art_df['mp_match'].sum()
 columns_string = '\n'.join(list(art_df.columns))
 
 ## Doc input
@@ -266,6 +297,9 @@ doc_fc.write(doc_input + '\n')
 doc_input = f'Data contains {str(art_df.shape[0] - n_withtext - n_withpaywall)} articles for which text was not retrieved for other reasons (articles that no longer exists, live blog pages, articles with non-standard formatting).'
 doc_fc.write(doc_input + '\n')
 
+doc_input = f'Data contains {str(n_withmps)} articles where one or several Members of the Danish Parliament are mentioned.'
+doc_fc.write(doc_input + '\n')
+
 doc_input = f'Data contains the following columns: {columns_string}'
 doc_fc.write(doc_input + '\n')
 
@@ -274,7 +308,7 @@ doc_fc.write(doc_input + '\n')
 doc_fc.close()
 
 # Save
-out_n = 'articles_subset_2023-02-14.json'
+out_n = 'PolMedUse_polnewsDK_2023-03-06.json'
 out_p = join(data_path, out_n)
 
 art_df.to_json(out_p, orient='records')

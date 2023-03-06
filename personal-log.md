@@ -156,3 +156,14 @@
   - Uses `articles_combined_2022-12-08_textdl_20221213.json` as raw data (latest collection with text dl from 2022-12-13)
   - Retrieve missing text from raw HTML, if text is missing and there is no paywall
   - Write out data changes (number of articles) to `docs/articles_subset_reportinput.txt`
+
+
+#### 2023-03-06
+
+- Creating new mp_check function (`mp_check2`) that includes when the politician was an MP.
+- Re-naming output data from `scripts/datahandling/articles_subset.py` to `PolMedUse_polnewsDK_[date-of-version]`.
+- Additions to `scripts/datahandling/articles_subset.py`:
+  - Re-creating variables `mp_matches` and `mp_match` using new `mp_check2` function (added to )
+  - Renaming variable 'article_datetime' to 'article_datetime_raw', keeping the data as is from collection
+  - Creating variable 'article_date' containing publishing date of article in standardized format (YYYY-MM-DD) - derived from 'article_datetime_raw'
+- Adding description of dataset: `docs/PolMedUse_polnewsDK_description.pdf`
