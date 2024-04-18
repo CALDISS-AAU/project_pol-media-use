@@ -2,7 +2,7 @@
 
 
 
-This repository contains software used for collection and handling of Danish news media data for the PhD dissertation [In the crossfield between traditional and social media: A  mixed-methods study of Danish parliamentarians' communication in a  hybrid media environment](https://vbn.aau.dk/en/projects/in-the-crossfield-between-traditional-and-social-media-a-mixed-me).
+This repository contains software used for collection and handling of Danish news media data for the PhD dissertation [Parliamentarians' media practices in a hybrid media environment: A mixed-methods study of cross-media strategies and behaviors in Danish politics](https://vbn.aau.dk/en/projects/parliamentarians-media-practices-in-a-hybrid-media-environment-a-).
 
 Please note that this repository is not in active development and is not configured to be able to run as its own module. This repository serves as documentation for how relevant Danish news media data was collected and handled for the project.
 
