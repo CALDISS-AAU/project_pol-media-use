@@ -6,7 +6,7 @@ This repository contains software used for collection and handling of Danish new
 
 Please note that this repository is not in active development and is not configured to be able to run as its own module. This repository serves as documentation for how relevant Danish news media data was collected and handled for the project.
 
-All web scraping of Danish news media outlets has been conducted with written consent from the relevant parties. We do not condone using software contained in this repository for scraping said news media outlets without their express consent.
+All web scraping of Danish news media outlets has been conducted with written consent from the relevant parties. Using the software contained in this repository for scraping said news media outlets should only be done with the express consent of the copyright holders (i.e. the news media outlets).
 
 
 
